@@ -97,6 +97,9 @@ checkEnv() {
     [[ -n $(printenv | grep $1) ]] && logTest "$1 is exist" || logTest "$1 is not exist"
 }
 
+#########################
+#### Shell Functions ####
+#########################
 
 deleteCmd() {
     if [[ -e $1 ]]; then
