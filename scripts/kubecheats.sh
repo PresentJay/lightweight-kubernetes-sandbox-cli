@@ -116,7 +116,24 @@ EOF
 
 
 createIngressHTTPS() {
-    cat <<EOF | kubectl apply -f -
+  if [[ -n $1 ]]; then
+    _HOSTNAME_=$1
+  else
+    logKill "give HostName in first parameter (ex. dashboard.kubernetes)"
+  fi
+  if [[ -n $2 ]]; then
+    _SERVICENAME_=$2
+  else
+    logKill "give ServiceName in second parameter (ex. kubernetes-dashboard)"
+  fi
+  if [[ -n $3 ]]; then
+    _HTTPSPORT_=$3
+  else
+    logKill "give Https Port in third parameter (ex. 8080)"
+  fi
+  [[ -z $4 ]] && _NS_="default" || _NS_=$4
+
+  cat <<EOF | kubectl apply -f -
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -125,19 +142,64 @@ metadata:
   annotations:
     kubernetes.io/ingress.class: nginx
     nginx.ingress.kubernetes.io/backend-protocol: HTTPS
+    nginx.ingress.kubernetes.io/proxy-body-size: 1000000m
 spec:
   tls:
     - hosts:
-        - ${HOSTNAME}.${LOCAL_ADDRESS}.nip.io
+        - ${_HOSTNAME_}.${LOCAL_ADDRESS}.nip.io
   rules:
-    - host: ${HOSTNAME}.${LOCAL_ADDRESS}.nip.io
+    - host: ${_HOSTNAME_}.${LOCAL_ADDRESS}.nip.io
       http:
         paths:
           - path: /
             pathType: Prefix
             backend:
               service:
-                name: ${SERVICENAME}
+                name: ${_SERVICENAME_}
                 port:
-                  number: ${HTTPSPORT}
+                  number: ${_HTTPSPORT_}
+EOF
 }
+
+createIngressHTTP() {
+  if [[ -n $1 ]]; then
+    _HOSTNAME_=$1
+  else
+    logKill "give HostName in first parameter (ex. dashboard.kubernetes)"
+  fi
+  if [[ -n $2 ]]; then
+    _SERVICENAME_=$2
+  else
+    logKill "give ServiceName in second parameter (ex. kubernetes-dashboard)"
+  fi
+  if [[ -n $3 ]]; then
+    _HTTPPORT_=$3
+  else
+    logKill "give Http Port in third parameter (ex. 80)"
+  fi
+  [[ -z $4 ]] && _NS_="default" || _NS_=$4
+
+  cat <<EOF | kubectl apply -f -
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: $1
+  namespace: $_NS_
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/proxy-body-size: 1000000m
+spec:
+  rules:
+    - host: ${_HOSTNAME_}.${LOCAL_ADDRESS}.nip.io
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: ${_SERVICENAME_}
+                port:
+                  number: ${_HTTPSPORT_}
+EOF
+}
+
