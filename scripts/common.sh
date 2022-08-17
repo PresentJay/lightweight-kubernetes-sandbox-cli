@@ -1,4 +1,5 @@
 #!/bin/bash
+# 쉘스크립트 베이스코드입니다.
 
 # Author: PresentJay (정현재, presentj94@gmail.com)
 
@@ -61,6 +62,27 @@ logHelpTail() {
     exit 1
 }
 
+caution_read() {
+    echo -n "[CAUTION] $@"
+}
+
+bar() {
+    echo -e "\n* * * * * * * * * * * * * * * * * * * * *\n"
+}
+
+# $1: size of blank line
+line() {
+    if [[ $# -eq 0 ]]; then
+        echo -e "\n"
+    elif [[ $# -eq 1 ]]; then
+        iter=0
+        until [[ $iter -le $1 ]]; do
+            echo -e "\n"
+            iter=$(( iter+1 ))
+        done
+    fi
+}
+
 #########################
 #### Check Functions ####
 #########################
@@ -96,6 +118,15 @@ checkOpt() {
 checkEnv() {
     [[ -n $(printenv | grep $1) ]] && logTest "$1 is exist" || logTest "$1 is not exist"
 }
+
+# explain: 주어진 param 수를 검사
+# $1: param 개수
+check_param_amount() {
+    objAmount=$1
+    shift
+    [[ $# -eq $objAmount ]] && echo $TRUE || echo $FALSE
+}
+
 
 #########################
 #### Shell Functions ####
