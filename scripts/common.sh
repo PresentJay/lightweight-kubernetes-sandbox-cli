@@ -3,12 +3,6 @@
 
 # Author: PresentJay (정현재, presentj94@gmail.com)
 
-case $(uname -s) in
-    "Darwin"* | "Linux"*) export _OS_="linux" ;;
-    "MINGW32"* | "MINGW64"* | "CYGWIN" ) export _OS_="windows" ;;
-    *) logKill "this OS($(uname -s)) is not supported yet." ;;
-esac
-
 
 #######################
 #### Log Functions ####
@@ -125,6 +119,18 @@ check_param_amount() {
     objAmount=$1
     shift
     [[ $# -eq $objAmount ]] && echo $TRUE || echo $FALSE
+}
+
+# explain: OS를 확인하여 mac, linux, windows 구분
+# no param
+check_OS(){
+    case $(uname -s) in
+        "Darwin"*) OSname="mac" ;;
+        "Linux"*) OSname="linux" ;;
+        "MINGW32"* | "MINGW64"* | "CYGWIN" ) OSname="win" ;;
+        *) logKill "this OS($(uname -s)) is not supported yet." ;;
+    esac
+    echo ${OSname}
 }
 
 
