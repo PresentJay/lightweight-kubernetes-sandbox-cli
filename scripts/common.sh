@@ -56,7 +56,7 @@ logHelpTail() {
     exit 1
 }
 
-caution_read() {
+cautionRead() {
     echo -n "[CAUTION] $@"
 }
 
@@ -115,15 +115,33 @@ checkEnv() {
 
 # explain: 주어진 param 수를 검사
 # $1: param 개수
-check_param_amount() {
+checkParamAmount() {
     objAmount=$1
     shift
     [[ $# -eq $objAmount ]] && echo $TRUE || echo $FALSE
 }
 
+# $1: param
+# $2: param이 없을 때 표시할 메세지
+checkParamOrLog() {
+    param=$1
+    message=$2
+    [[ -z $param ]] && logKill $message
+}
+
+# $1: namespace option
+checkNamespaceOption() {
+    namespace_option=$1
+    if [[ -z $namespace_option ]]; then
+        echo "default"
+    else
+        echo ${namespace_option}
+    fi        
+}
+
 # explain: OS를 확인하여 mac, linux, windows 구분
 # no param
-check_OS(){
+checkOS(){
     case $(uname -s) in
         "Darwin"*) OSname="mac" ;;
         "Linux"*) OSname="linux" ;;
@@ -149,8 +167,9 @@ deleteCmd() {
     fi
 }
 
-get_env() {
-    ENV_LOC="./docker/.env"
+# $1: env file 위치
+getEnv() {
+    ENV_LOC=$1
 
     while read line; do
         if [[ -z $(echo ${line} | grep "#") ]]; then
@@ -159,8 +178,9 @@ get_env() {
     done < ${ENV_LOC}
 }
 
+# TODO: Kubeconfig 생성 시 그쪽으로 빼기
 ### helm의 config permission error 제거 ###
 chmod o-r ${KUBECONFIG_LOC}
 chmod g-r ${KUBECONFIG_LOC}
 
-get_env
+get_env "./docker/.env"
