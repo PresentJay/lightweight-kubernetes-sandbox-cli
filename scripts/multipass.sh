@@ -21,7 +21,7 @@ case $(checkOpt iupr $@) in
                 ${CLUSTER_UBUNTU_VERSION}
 
             # 각 노드별 필수 유틸리티 설치 (nfs, iscsi : virtual storage 위한 설치)
-            multipass exec node${ITER} -- sudo apt-get update -y 
+            multipass exec node${ITER} -- sudo apt-get update -y
             multipass exec node${ITER} -- sudo apt-get install -y \
                 nfs-common \
                 open-iscsi \

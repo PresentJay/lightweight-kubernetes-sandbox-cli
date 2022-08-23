@@ -33,8 +33,9 @@ case $(checkOpt iupr $@) in
             else
                 # Worker node : k3s 설치 (Master Node에 대해 K3S_TOKEN을 통한 인증)
                 multipass exec node${ITER} -- bash -c "curl -sfL: https://get.k3s.io | \
-                    INSTALL_K3S_VERSION=${K3S_VERSION} K3S_URL=\"${K3S_URL_FULL}\" K3S_TOKEN=\"${K3S_TOKEN}\" sh -"
+                    INSTALL_K3S_VERSION=${K3S_VERSION} K3S_URL=\"${K3S_URL_FULL}\" K3S_TOKEN=\"${K3S_TOKEN}\" sh -" &
             fi
+            wait
             
             logSuccess "node${ITER} is set for k3s"
             ITER=$(( ITER+1 ))
