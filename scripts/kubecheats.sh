@@ -129,24 +129,23 @@ getIngressURL() {
 getIngressPort() {
     # Validate
     checkParamOrLog $1 "need param 1: \"http\" or \"https\""
+    ! checkParamIsInList $1 ("http" "https") &&
+        logKill "param 1 should be  \"http\" or \"https\""    
     checkParamOrLog $2 "need param 2: ingress-controller service name"
-    if [[ $1="http" ]];
-        then index=0
-    elif [[ $1="https" ]]; then
-        index=1
-    else
-        logKill "second parameter should be \"http\" or \"https\""
-    fi
 
     # Check On Eyes Phase
     _protocol_=$1
     _serviceName_=$2
     _namespace_=$(checkNamespaceOption $3)
+    case $1 in
+        http) _index_=0 ;;
+        https) _index_=1 ;;
+    esac
 
     # Do
     case ${INGRESS} in
         ingress-nginx)
-            find=$(kubectl get svc $_serviceName_ -n $_namespace_ -o jsonpath="{.spec.ports[${index}].nodePort}")
+            find=$(kubectl get svc ${_serviceName_} -n ${_namespace_} -o jsonpath="{.spec.ports[${_index_}].nodePort}")
         ;;
         ? | *)
             logKill "supported ingress controller: \"ingress-nginx\""
@@ -309,9 +308,8 @@ applyPVC() {
     checkParamOrLog $2 "need param 2: storageclass name"
     checkParamOrLog $3 "need param 3: pvc amount"
     checkParamOrLog $4 "need param 4: pvc unit (Gi, Mi)"
-    if [ $1 != "Gi" ] && [ $1 != "Mi" ]; then
+    ! checkParamIsInList $4 ("Gi" "Mi") && \
         logKill "param 4: pvc unit should be \"Gi\" or \"Mi\""
-    fi
     checkParamOrLog $5 "need param 5: package name"
     
 
