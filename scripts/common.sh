@@ -178,6 +178,30 @@ getEnv() {
     done < ${ENV_LOC}
 }
 
+# $1: answer variable (will be export)
+# $2: question string
+getYorN() {
+    unset $1
+    while :
+    do
+        cautionRead "$2 (y/n): "
+        read temp
+        [[ ${temp} == "y" ]] && break
+        [[ ${temp} == "n" ]] && break
+        logInfo "write just 'y' or 'n' please"
+    done
+    eval "$1=${temp}"
+}
+
+# $1: answer variable
+checkYorN() {
+    if [[ $1 = "y" ]]; then
+        return $TRUE
+    elif [[ $1 = "n" ]]; then
+        return $FALSE
+    fi
+}
+
 getEnv "./config/.env"
 
 # TODO: pwd가 프로젝트 루트가 아닌 경우 스크립트가 동작하지 않도록 하는 조건문 추가 필요!
