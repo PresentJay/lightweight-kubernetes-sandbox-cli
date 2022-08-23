@@ -12,8 +12,8 @@ case $(checkOpt iupr $@) in
     i | install)
         # 생성한 node에서 k3s cluster 구축
         # k3s 버전은 .env에 정의한 kubernetes를 기반으로 함
-        ITER=1
-        while [[ ${ITER} -le ${CLUSTER_NODE_AMOUNT} ]]; do
+        ITER=${CLUSTER_NODE_STARTINDEX}
+        while [[ ${ITER} -le $(( CLUSTER_NODE_STARTINDEX + CLUSTER_NODE_AMOUNT - 1 )) ]]; do
             if [[ ${ITER} -eq 1 ]]; then
                 # Master node : k3s 설치
                 # kubernetes version 고정, traefik 사용 해제(v1이기 때문), servicelb 사용 해제, 기본 스토리지 해제
@@ -39,20 +39,20 @@ case $(checkOpt iupr $@) in
             logSuccess "node${ITER} is set for k3s"
             ITER=$(( ITER+1 ))
         done
-        case $_OS_ in
-            "linux")
-                multipass exec node1 sudo cat /etc/rancher/k3s/k3s.yaml > ${KUBECONFIG}
-                sed -i '' "s/127.0.0.1/${K3S_URL}/" ${KUBECONFIG}
+        case $(checkOS) in
+            "linux" | "mac")
+                multipass exec node${CLUSTER_NODE_STARTINDEX} sudo cat /etc/rancher/k3s/k3s.yaml > ${KUBECONFIG_LOC}
+                sed -i '' "s/127.0.0.1/${K3S_URL}/" ${KUBECONFIG_LOC}
             ;;
-            "windows")
-                multipass exec node1 -- bash -c "sudo cat /etc/rancher/k3s/k3s.yaml" > ${KUBECONFIG}
-                sed -i "s/127.0.0.1/${K3S_URL}/" ${KUBECONFIG}
+            "win")
+                multipass exec node${CLUSTER_NODE_STARTINDEX} -- bash -c "sudo cat /etc/rancher/k3s/k3s.yaml" > ${KUBECONFIG_LOC}
+                sed -i "s/127.0.0.1/${K3S_URL}/" ${KUBECONFIG_LOC}
             ;;
         esac
 
         ### helm의 config permission error 제거 ###
-        chmod o-r config/kubeconfig.yaml
-        chmod g-r config/kubeconfig.yaml
+        chmod o-r ${KUBECONFIG_LOC}
+        chmod g-r ${KUBECONFIG_LOC}
     ;;
     u | uninstall)
         # TBD

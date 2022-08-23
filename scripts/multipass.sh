@@ -33,27 +33,30 @@ case $(checkOpt iupr $@) in
     ;;
     u | uninstall)
         # .env에 정의한 cluster setup에 맞춰 노드 삭제
-        ITER=1
-        while [[ ${ITER} -le ${CLUSTER_NODE_AMOUNT} ]]; do
+        ITER=${CLUSTER_NODE_STARTINDEX}
+        while [[ ${ITER} -le $(( CLUSTER_NODE_STARTINDEX + CLUSTER_NODE_AMOUNT - 1 )) ]]; do
             multipass delete node${ITER} -p &
             ITER=$(( ITER+1 ))
         done
+        wait
     ;;
     p | pause)
         # .env에 정의한 cluster setup에 맞춰 노드 stop
-        ITER=1
-        while [[ ${ITER} -le ${CLUSTER_NODE_AMOUNT} ]]; do
-            multipass stop node${ITER}
+        ITER=${CLUSTER_NODE_STARTINDEX}
+        while [[ ${ITER} -le $(( CLUSTER_NODE_STARTINDEX + CLUSTER_NODE_AMOUNT - 1 )) ]]; do
+            multipass stop node${ITER} &
             ITER=$(( ITER+1 ))
         done
+        wait
     ;;
     r | resume)
         # .env에 정의한 cluster setup에 맞춰 노드 restart
-        ITER=1
-        while [[ ${ITER} -le ${CLUSTER_NODE_AMOUNT} ]]; do
-            multipass start node${ITER}
+        ITER=${CLUSTER_NODE_STARTINDEX}
+        while [[ ${ITER} -le $(( CLUSTER_NODE_STARTINDEX + CLUSTER_NODE_AMOUNT - 1 )) ]]; do
+            multipass start node${ITER} &
             ITER=$(( ITER+1 ))
         done
+        wait
     ;;
     h | help | ? | *)
         logHelpHead "scripts/multipass.sh"
