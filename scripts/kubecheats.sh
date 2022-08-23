@@ -4,6 +4,10 @@
 
 # Author: PresentJay (정현재, presentj94@gmail.com)
 
+source scripts/common.sh
+
+
+
 ############
 # *ingress #
 ############
@@ -121,12 +125,11 @@ getIngressURL() {
 # TODO: ingress-nginx에 대해서만 로직 구현. traefik 등과 통합해서 쓰일 수 있도록 코드 확장 필요
 # $1: http / https
 # $2: ingress-controller service name
-# $3: ingress-controller namespace
+# $3: ingress-controller namespace (optional)
 getIngressPort() {
     # Validate
     checkParamOrLog $1 "need param 1: \"http\" or \"https\""
     checkParamOrLog $2 "need param 2: ingress-controller service name"
-    checkParamOrLog $3 "need param 3: ingress-controller namespace"
     if [[ $1="http" ]];
         then index=0
     elif [[ $1="https" ]]; then
@@ -138,12 +141,15 @@ getIngressPort() {
     # Check On Eyes Phase
     _protocol_=$1
     _serviceName_=$2
-    _namespace_=$3
+    _namespace_=$(checkNamespaceOption $3)
 
     # Do
     case ${INGRESS} in
         ingress-nginx)
             find=$(kubectl get svc $_serviceName_ -n $_namespace_ -o jsonpath="{.spec.ports[${index}].nodePort}")
+        ;;
+        ? | *)
+            logKill "supported ingress controller: \"ingress-nginx\""
         ;;
     esac
 
@@ -173,10 +179,10 @@ applyService() {
     checkParamOrLog $3 "need param 3: package name"
 
     # Check On Eyes Phase
-    _namespace_=$(checkNamespaceOption $4)
     _nameAndAppName_=$1
     _targetPort_=$2
     _packageName_=$3
+    _namespace_=$(checkNamespaceOption $4)
 
     # Do
     cat <<EOF | kubectl apply -f -

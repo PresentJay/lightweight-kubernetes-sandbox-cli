@@ -4,6 +4,25 @@
 # Author: PresentJay (정현재, presentj94@gmail.com)
 
 
+# explain: ITERATION_LIMIT 회에 걸쳐 성공하기까지 반복하는 function (log 남김)
+# $@: command
+# examples
+# -> "loop_to_success (somecommand)"
+loop_to_success() {
+    silentMode=$FALSE
+    [ $1 = "--silent" ] && silentMode=$TRUE
+    ITER=0
+    while :
+    do
+        ITER=$(( ITER+1 ))
+        # silentMode &&
+        echo "try to exec command: '$@' (${ITER}/${ITERATION_LIMIT} trials)"
+        eval $@ && break
+        sleep ${ITERATION_LATENCY}
+        if [[ ITER -eq ${ITERATION_LIMIT} ]]; then logKill "command iteration is close to limit > exit. (${ITER}/${ITERATION_LIMIT} failed)"; fi;
+    done
+}
+
 #######################
 #### Log Functions ####
 #######################
@@ -31,21 +50,21 @@ logHelpHead() {
 
 logHelpContent() {
     if [[ $# -gt 2 ]]; then
-        param_cnt=1
+        paramCnt=1
         echo -en "\t["
-        while (($param_cnt<$#)); do
-            case ${param_cnt} in
+        while (( ${paramCnt} < $# )); do
+            case ${{paramCnt}} in
                 1)
                     echo -n "-"
-                    echo -n "${!param_cnt}"
+                    echo -n "${!{paramCnt}}"
                 ;;
                 *)
-                    echo -n ", --${!param_cnt}"
+                    echo -n ", --${!{paramCnt}}"
                 ;;
             esac
-            param_cnt=$((${param_cnt}+1))
+            {paramCnt}=$((${{paramCnt}}+1))
         done
-        echo -e "]: ${!param_cnt}"
+        echo -e "]: ${!{paramCnt}}"
     elif [[ $# -eq 2 ]]; then
         echo -e "\t[--$1]: $2"
     fi
@@ -116,23 +135,23 @@ checkEnv() {
 # explain: 주어진 param 수를 검사
 # $1: param 개수
 checkParamAmount() {
-    objAmount=$1
+    _objAmount_=$1
     shift
-    [[ $# -eq $objAmount ]] && echo $TRUE || echo $FALSE
+    [[ $# -eq $_objAmount_ ]] && echo $TRUE || echo $FALSE
 }
 
 # $1: param
 # $2: param이 없을 때 표시할 메세지
 checkParamOrLog() {
-    param=$1
-    message=$2
-    [[ -z $param ]] && logKill $message
+    _param_=$1
+    _message_=$2
+    [[ -z $_param_ ]] && logKill $_message_
 }
 
 # $1: namespace option
 checkNamespaceOption() {
-    namespace_option=$1
-    if [[ -z $namespace_option ]]; then
+    _namespace_option_=$1
+    if [[ -z ${_namespace_option_} ]]; then
         echo "default"
     else
         echo ${namespace_option}
@@ -141,14 +160,35 @@ checkNamespaceOption() {
 
 # explain: OS를 확인하여 mac, linux, windows 구분
 # no param
-checkOS(){
+checkOS() {
     case $(uname -s) in
-        "Darwin"*) OSname="mac" ;;
-        "Linux"*) OSname="linux" ;;
-        "MINGW32"* | "MINGW64"* | "CYGWIN" ) OSname="win" ;;
+        "Darwin"* | "Linux"*) _OSname_="linux" ;;
+        "MINGW32"* | "MINGW64"* | "CYGWIN" ) _OSname_="win" ;;
         *) logKill "this OS($(uname -s)) is not supported yet." ;;
     esac
-    echo ${OSname}
+    echo ${_OSname_}
+}
+
+# $1: answer variable
+checkYorN() {
+    if [[ $1 = "y" ]]; then
+        return $TRUE
+    elif [[ $1 = "n" ]]; then
+        return $FALSE
+    fi
+}
+
+# $1: given param
+# $2: array of param available list (separated with a space) : [something1 something2 ...]
+checkParamIsInList() {
+    _givenParam_=$1
+    shift
+    _availableParamList_=$@
+
+    for _availableParam_ in ${_availableParamList_[@]}; do
+        [ ${_givenParam_} = ${_availableParam_} ] && return $TRUE
+    done
+    return $FALSE
 }
 
 
@@ -156,12 +196,13 @@ checkOS(){
 #### Shell Functions ####
 #########################
 
+# $1: delete할 Cmd File (linux의 경우 명령어 설정까지 함께 삭제)
 deleteCmd() {
     if [[ -e $1 ]]; then
         echo -n "[DELETE] "
         rm -v $1
     fi
-    if [[ -e /usr/local/bin/$1 ]]; then
+    if [ $(checkOS) = "linux" ] && [ -e /usr/local/bin/$1 ]; then
         echo -n "[DELETE] "
         rm -v /usr/local/bin/$1
     fi
@@ -193,14 +234,6 @@ getYorN() {
     eval "$1=${temp}"
 }
 
-# $1: answer variable
-checkYorN() {
-    if [[ $1 = "y" ]]; then
-        return $TRUE
-    elif [[ $1 = "n" ]]; then
-        return $FALSE
-    fi
-}
 
 getEnv "./config/.env"
 
