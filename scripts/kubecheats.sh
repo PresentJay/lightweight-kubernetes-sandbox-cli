@@ -6,19 +6,37 @@
 
 source scripts/common.sh
 
+# Prerequisite 검사 (kubectl, helm)
+checkPrerequisite helm
+checkPrerequisite kubectl
+
 # TODO: pwd가 프로젝트 루트가 아닌 경우 스크립트가 동작하지 않도록 하는 조건문 추가 필요!
 
 if [[ -e ${KUBECONFIG_LOC} ]]; then
     export KUBECONFIG=$(pwd)/${KUBECONFIG_LOC}
-    _hostEndpointIP_=$(kubectl config view -o jsonpath="{.clusters[0].cluster.server}" | cut -d"/" -f3 | cut -d":" -f1)
+    hostEndpointIP=$(kubectl config view -o jsonpath="{.clusters[0].cluster.server}" | cut -d"/" -f3 | cut -d":" -f1)
     _clusterCount_=$(kubectl config view -o jsonpath="{.clusters}" | jq length)
-    _masterNodeIP_=$(kubectl config view -o jsonpath="{.clusters[$((${$_clusterCount_}-1))].cluster.server}" | cut -d"/" -f3 | cut -d":" -f1)
+    masterNodeIP=$(kubectl config view -o jsonpath="{.clusters[$((${$_clusterCount_}-1))].cluster.server}" | cut -d"/" -f3 | cut -d":" -f1)
 else
     echo "***<SYSLOG>***"
     echo "yet does not configed kubeconfig in your system."
     echo "if you run this system on multipass, try run [sodas-manager --node init]"
     echo "***</SYSLOG>***"
 fi
+
+############
+# *namespace #
+############
+
+# $1: namespace name
+checkNamespace() {
+    if [[ -n $(kubectl get namespace $1) ]]; then
+        return $TRUE
+    else
+        return $FALSE
+    fi
+}
+
 
 ############
 # *ingress #
@@ -34,11 +52,11 @@ applyIngressNginxHTTPS() {
     checkParamOrLog $4 "need param 4: package name"
 
     # Check On Eyes Phase
-    _hostName_=$1
-    _serviceName_=$2
-    _httpsPort_=$3
-    _packageName_=$4
-    _namespace_=$(checkNamespaceOption $5)
+    local _hostName_=$1
+    local _serviceName_=$2
+    local _httpsPort_=$3
+    local _packageName_=$4
+    local _namespace_=$(checkNamespaceOption $5)
 
     # Do
     cat <<EOF | kubectl apply -f -
@@ -56,9 +74,9 @@ metadata:
 spec:
   tls:
     - hosts:
-        - ${_hostName_}.${_masterNodeIP_}.nip.io
+         ${_hostName_}.${_masterNodeIP}.nip.io
   rules:
-    - host: ${_hostName_}.${_masterNodeIP_}.nip.io
+     host: ${_hostName_}.${_masterNodeIP}.nip.io
       http:
         paths:
           - path: /
@@ -79,11 +97,11 @@ applyIngressNginxHTTP() {
     checkParamOrLog $4 "need param 4: package name"
 
     # Check On Eyes Phase
-    _hostName_=$1
-    _serviceName_=$2
-    _httpPort_=$3
-    _packageName_=$4
-    _namespace_=$(checkNamespaceOption $5)
+    local _hostName_=$1
+    local _serviceName_=$2
+    local _httpPort_=$3
+    local _packageName_=$4
+    local _namespace_=$(checkNamespaceOption $5)
 
     cat <<EOF | kubectl apply -f -
 apiVersion: networking.k8s.io/v1
@@ -98,7 +116,7 @@ metadata:
     nginx.ingress.kubernetes.io/proxy-body-size: 1000000m
 spec:
   rules:
-    - host: ${_hostName_}.${_masterNodeIP_}.nip.io
+     host: ${_hostName_}.${_masterNodeIP}.nip.io
       http:
         paths:
           - path: /
@@ -120,8 +138,8 @@ getIngressURL() {
     checkParamOrLog $1 "need param 1: ingress name"
     
     # Check On Eyes Phase
-    _ingressName_=$1
-    _namespace_=$(checkNamespaceOption $2)
+    local _ingressName_=$1
+    local _namespace_=$(checkNamespaceOption $2)
 
     # Do
     find=$(kubectl get ingress ${_ingressName_} -n ${_namespace_} | grep ${_ingressName_} | awk '{print $3}')
@@ -146,12 +164,12 @@ getIngressPort() {
     checkParamOrLog $2 "need param 2: ingress-controller service name"
 
     # Check On Eyes Phase
-    _protocol_=$1
-    _serviceName_=$2
-    _namespace_=$(checkNamespaceOption $3)
+    local _protocol_=$1
+    local _serviceName_=$2
+    local _namespace_=$(checkNamespaceOption $3)
     case $1 in
-        http) _index_=0 ;;
-        https) _index_=1 ;;
+        http) local _index_=0 ;;
+        https) local _index_=1 ;;
     esac
 
     # Do
@@ -190,10 +208,10 @@ applyService() {
     checkParamOrLog $3 "need param 3: package name"
 
     # Check On Eyes Phase
-    _nameAndAppName_=$1
-    _targetPort_=$2
-    _packageName_=$3
-    _namespace_=$(checkNamespaceOption $4)
+    local _nameAndAppName_=$1
+    local _targetPort_=$2
+    local _packageName_=$3
+    local _namespace_=$(checkNamespaceOption $4)
 
     # Do
     cat <<EOF | kubectl apply -f -
@@ -226,11 +244,11 @@ applyServiceFull() {
     checkParamOrLog $4 "need param 4: package name"
 
     # Check On Eyes Phase
-    _nameAndAppName_=$1
-    _httpPort_=$2
-    _httpsPort_=$3
-    _packageName_=$4
-    _namespace_=$(checkNamespaceOption $5)
+    local _nameAndAppName_=$1
+    local _httpPort_=$2
+    local _httpsPort_=$3
+    local _packageName_=$4
+    local _namespace_=$(checkNamespaceOption $5)
 
     # Do
     cat <<EOF | kubectl apply -f -
@@ -268,9 +286,9 @@ getSvcNodePort() {
     checkParamOrLog $2 "need param 2: port index"
 
     # Check On Eyes Phase
-    _serviceName_=$1
-    _portIndex_=$2
-    _namespace_=$(checkNamespaceOption $3)
+    local _serviceName_=$1
+    local _portIndex_=$2
+    local _namespace_=$(checkNamespaceOption $3)
 
     # Do
     find=$(kubectl get svc $_serviceName_ -n ${_namespace_} -o jsonpath="{.spec.ports[$2].nodePort}")
@@ -291,9 +309,9 @@ getSvcPort() {
     checkParamOrLog $2 "need param 2: port index"
 
     # Check On Eyes Phase
-    _serviceName_=$1
-    _portIndex_=$2
-    _namespace_=$(checkNamespaceOption $3)
+    local _serviceName_=$1
+    local _portIndex_=$2
+    local _namespace_=$(checkNamespaceOption $3)
 
     # Do
     find=$(kubectl get svc $_serviceName_ -n ${_namespace_} -o jsonpath="{.spec.ports[$_portIndex_].port}")
@@ -326,11 +344,11 @@ applyPVC() {
     
 
     # Check On Eyes Phase
-    _PVCname_=$1
-    _storageClassName_=$2
-    _PVCamount_=$3
-    _PVCunit_=$4
-    _packageName_=$5
+    local _PVCname_=$1
+    local _storageClassName_=$2
+    local _PVCamount_=$3
+    local _PVCunit_=$4
+    local _packageName_=$5
 
     cat <<EOF | kubectl apply -f -
 apiVersion: v1
@@ -354,23 +372,22 @@ EOF
 
 # param $1: helm repo name
 # examples: "helm_repo_check ${somereponame}"
-helm_repo_check() {
+checkHelmRepo() {
     if [[ -n $(helm repo ls | grep $1) ]]; then
         logInfo "helm repo \"$1\" is already installed."
-        return $FALSE
-    else
         return $TRUE
+    else
+        return $FALSE
     fi
 }
 
-# explain: TODO
 # param $1: helm chart name
 # examples: "helm_check ${somehelmchartname}"
-helm_check() {
+checkHelm() {
     if [[ -n $(helm ls --all-namespaces | grep $1) ]]; then
         logInfo "\"$1\" installation is already in helm."
-        return $FALSE
-    else
         return $TRUE
+    else
+        return $FALSE
     fi
 }
