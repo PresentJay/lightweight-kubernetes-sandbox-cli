@@ -33,10 +33,10 @@ applyIngressNginxHTTPS() {
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: $_serviceName_
-  namespace: $_namespace_
+  name: ${_serviceName_}
+  namespace: ${_namespace_}
   labels:
-    package: $_packageName_
+    package: ${_packageName_}
   annotations:
     kubernetes.io/ingress.class: nginx
     nginx.ingress.kubernetes.io/backend-protocol: HTTPS
@@ -77,10 +77,10 @@ applyIngressNginxHTTP() {
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: $_serviceName_
-  namespace: $_namespace_
+  name: ${_serviceName_}
+  namespace: ${_namespace_}
   labels:
-    package: $_packageName_
+    package: ${_packageName_}
   annotations:
     kubernetes.io/ingress.class: nginx
     nginx.ingress.kubernetes.io/proxy-body-size: 1000000m
@@ -112,13 +112,13 @@ getIngressURL() {
     _namespace_=$(checkNamespaceOption $2)
 
     # Do
-    find=$(kubectl get ingress $_ingressName_ -n $_namespace_ | grep $_ingressName_ | awk '{print $3}')
+    find=$(kubectl get ingress ${_ingressName_} -n ${_namespace_} | grep ${_ingressName_} | awk '{print $3}')
 
     if [[ -n ${find} ]]; then
         echo ${find}
     else
         return $FALSE
-        logInfo "can't found ingress of $_ingressName_"
+        logInfo "can't found ingress of ${_ingressName_}"
     fi
 }
 
@@ -188,16 +188,16 @@ applyService() {
 apiVersion: v1
 kind: Service
 metadata:
-  name: $_nameAndAppName_
-  namespace: $_namespace_
+  name: ${_nameAndAppName_}
+  namespace: ${_namespace_}
   labels:
-    package: $_packageName_
+    package: ${_packageName_}
 spec:
   ports:
-  - port: $_targetPort_
-    targetPort: $_targetPort_
+  - port: ${_targetPort_}
+    targetPort: ${_targetPort_}
   selector:
-    app: $_nameAndAppName_
+    app: ${_nameAndAppName_}
 EOF
 }
 
@@ -225,21 +225,21 @@ applyServiceFull() {
 apiVersion: v1
 kind: Service
 metadata:
-    name: $_nameAndAppName_
-    namespace: $_namespace_
+    name: ${_nameAndAppName_}
+    namespace: ${_namespace_}
     labels:
-        package: $_packageName_
+        package: ${_packageName_}
 spec:
     ports:
     - name: http
-        port: $_httpPort_
-        targetPort: $_httpPort_
+        port: ${_httpPort_}
+        targetPort: ${_httpPort_}
     - name: https
-        port: $_httpsPort_
-        targetPort: $_httpsPort_
+        port: ${_httpsPort_}
+        targetPort: ${_httpsPort_}
 
   selector:
-    app: $_nameAndAppName_
+    app: ${_nameAndAppName_}
 EOF
 }
 
@@ -261,7 +261,7 @@ getSvcNodePort() {
     _namespace_=$(checkNamespaceOption $3)
 
     # Do
-    find=$(kubectl get svc $_serviceName_ -n $_namespace_ -o jsonpath="{.spec.ports[$2].nodePort}")
+    find=$(kubectl get svc $_serviceName_ -n ${_namespace_} -o jsonpath="{.spec.ports[$2].nodePort}")
 
     if [[ -n ${find} ]]; then
         echo ${find}
@@ -284,7 +284,7 @@ get_svc_port() {
     _namespace_=$(checkNamespaceOption $3)
 
     # Do
-    find=$(kubectl get svc $_serviceName_ -n $_namespace_ -o jsonpath="{.spec.ports[$_portIndex_].port}")
+    find=$(kubectl get svc $_serviceName_ -n ${_namespace_} -o jsonpath="{.spec.ports[$_portIndex_].port}")
     if [[ -n ${find} ]]; then
         echo ${find}
     else
@@ -324,13 +324,13 @@ applyPVC() {
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: $_PVCname_
+  name: ${_PVCname_}
 spec:
   accessModes:
     - ReadWriteMany
-  storageClassName: $_storageClassName_
+  storageClassName: ${_storageClassName_}
   resources:
     requests:
-      storage: $3$_
+      storage: ${_PVCamount_}${_PVCunit_}
 EOF
 }
