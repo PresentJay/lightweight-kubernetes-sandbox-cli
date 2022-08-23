@@ -11,8 +11,8 @@ checkPrerequisite multipass
 case $(checkOpt iupr $@) in
     i | install)
         # .env에 정의한 cluster setup에 맞춰 노드 생성
-        ITER=1
-        while [[ ${ITER} -le ${CLUSTER_NODE_AMOUNT} ]]; do
+        ITER=${CLUSTER_NODE_STARTINDEX}
+        while [[ ${ITER} -le $(( CLUSTER_NODE_STARTINDEX + CLUSTER_NODE_AMOUNT - 1 )) ]]; do
             multipass launch \
                 --name node${ITER} \
                 --cpus ${CLUSTER_CPU_CAPACITY} \
