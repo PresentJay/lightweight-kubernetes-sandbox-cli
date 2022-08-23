@@ -5,21 +5,23 @@
 
 
 # explain: ITERATION_LIMIT 회에 걸쳐 성공하기까지 반복하는 function (log 남김)
+# $1: silent mode check (--silent)
 # $@: command
 # examples
 # -> "loop_to_success (somecommand)"
 loop_to_success() {
-    silentMode=$FALSE
-    [ $1 = "--silent" ] && silentMode=$TRUE
-    ITER=0
+    local _silentMode_=$FALSE
+    [ $1 = "--silent" ] && _silentMode_=$TRUE
+
+    local _iter_=0
     while :
     do
-        ITER=$(( ITER+1 ))
-        # silentMode &&
-        echo "try to exec command: '$@' (${ITER}/${ITERATION_LIMIT} trials)"
+        _iter_=$(( _iter_+1 ))
+        [ $_silentMode_ = $FALSE ] && \
+            echo "try to exec command: '$@' (${_iter_}/${ITERATION_LIMIT} trials)"
         eval $@ && break
         sleep ${ITERATION_LATENCY}
-        if [[ ITER -eq ${ITERATION_LIMIT} ]]; then logKill "command iteration is close to limit > exit. (${ITER}/${ITERATION_LIMIT} failed)"; fi;
+        if [[ _iter_ -eq ${ITERATION_LIMIT} ]]; then logKill "command iteration is close to limit > exit. (${ITER}/${ITERATION_LIMIT} failed)"; fi;
     done
 }
 

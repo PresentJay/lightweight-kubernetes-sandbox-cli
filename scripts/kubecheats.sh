@@ -346,3 +346,31 @@ spec:
       storage: ${_PVCamount_}${_PVCunit_}
 EOF
 }
+
+
+#########
+# *helm #
+#########
+
+# param $1: helm repo name
+# examples: "helm_repo_check ${somereponame}"
+helm_repo_check() {
+    if [[ -n $(helm repo ls | grep $1) ]]; then
+        logInfo "helm repo \"$1\" is already installed."
+        return $FALSE
+    else
+        return $TRUE
+    fi
+}
+
+# explain: TODO
+# param $1: helm chart name
+# examples: "helm_check ${somehelmchartname}"
+helm_check() {
+    if [[ -n $(helm ls --all-namespaces | grep $1) ]]; then
+        logInfo "\"$1\" installation is already in helm."
+        return $FALSE
+    else
+        return $TRUE
+    fi
+}

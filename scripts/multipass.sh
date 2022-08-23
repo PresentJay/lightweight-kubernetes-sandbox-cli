@@ -26,10 +26,11 @@ case $(checkOpt iupr $@) in
                 nfs-common \
                 open-iscsi \
                 nfs-kernel-server \
-                lvm2
+                lvm2 &
 
             ITER=$(( ITER+1 ))
         done
+        wait
     ;;
     u | uninstall)
         # .env에 정의한 cluster setup에 맞춰 노드 삭제
@@ -58,12 +59,20 @@ case $(checkOpt iupr $@) in
         done
         wait
     ;;
+    check-node)
+        if [[ -n $(multipass list | grep $1) ]]; then
+            echo $TRUE
+        else
+            echo $FALSE
+        fi
+    ;;
     h | help | ? | *)
         logHelpHead "scripts/multipass.sh"
         logHelpContent i install "install multipass clusters"
         logHelpContent u uninstall "uninstall clusters"
         logHelpContent p pause "pause clusters"
         logHelpContent r resume "resume paused clusters"
+        logHelpContent check-node "check node is live"
         logHelpTail
     ;;
 esac
