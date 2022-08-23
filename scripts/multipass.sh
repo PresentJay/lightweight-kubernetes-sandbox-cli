@@ -2,7 +2,6 @@
 
 # Author: PresentJay (정현재, presentj94@gmail.com)
 
-source ./scripts/env.sh
 source ./scripts/common.sh
 
 # Prerequisite 검사 (multipass, kubectl)
