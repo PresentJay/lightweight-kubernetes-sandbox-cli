@@ -16,7 +16,7 @@ if [[ -e ${KUBECONFIG_LOC} ]]; then
     export KUBECONFIG=$(pwd)/${KUBECONFIG_LOC}
     hostEndpointIP=$(kubectl config view -o jsonpath="{.clusters[0].cluster.server}" | cut -d"/" -f3 | cut -d":" -f1)
     _clusterCount_=$(kubectl config view -o jsonpath="{.clusters}" | jq length)
-    masterNodeIP=$(kubectl config view -o jsonpath="{.clusters[$((${$_clusterCount_}-1))].cluster.server}" | cut -d"/" -f3 | cut -d":" -f1)
+    masterNodeIP=$(kubectl config view -o jsonpath="{.clusters[$((_clusterCount_-1))].cluster.server}" | cut -d"/" -f3 | cut -d":" -f1)
 else
     echo "***<SYSLOG>***"
     echo "yet does not configed kubeconfig in your system."
@@ -24,9 +24,74 @@ else
     echo "***</SYSLOG>***"
 fi
 
-############
+# $1: type of kubernetes object
+# $2: name of kubernetes object
+# $3: namespace (optional)
+checkObject() {
+    # Validate
+    checkParamOrLog $1 "need param 1: kubernetes object type"
+    checkParamOrLog $2 "need param 2: kubernetes object name"
+
+    # Check On Eyes Phase
+    local _ObjType_=$1
+    local _ObjName_=$2
+    local _namespace_=$(checkNamespaceOption $3)
+
+    # Do
+    if [[ -n $(kubectl get ${_ObjType_} ${_ObjName_} -n ${_namespace_}) ]]; then
+        return $TRUE
+    else
+        logInfo "${_ObjType_}/${_ObjName_} could not found. . . BREAK"
+        return $FALSE
+    fi
+}
+
+# $1: object type
+# $2: object name
+# $3: namespace (optional)
+deleteSequence() {
+    # Validate
+    checkParamOrLog $1 "need param 1: object type (ex. pod, namespace ...)"
+    checkParamOrLog $2 "need param 2: object name (ex. podnametest1 ...)"
+
+    # Check On Eyes Phase
+    local _objectType_=$1
+    local _objectName_=$2
+    local _namespace_=$(checkNamespaceOption $3)
+    
+    if [[ ${_objectType_} = "helm" ]]; then
+        ! checkHelm ${_objectName_} ${_namespace_} \
+            && logInfo "helm/${_objectName_} could not found. . . BREAK" \
+            && return $FALSE \
+            || helm uninstall ${_objectName_} -n ${_namespace_} 
+    else
+        checkObject ${_objectType_} ${_objectName_} ${_namespace_} \
+            && loopToSuccess "kubectl delete ${_objectType_} ${_objectName_} -n ${_namespace_}" \
+            || return $FALSE
+        case $1 in
+            deployment)
+                # TODO
+            ;;
+            job)
+                # TODO
+            ;;
+            statefulset)
+                # TODO
+            ;;
+            configmap | service | secret | pv)
+                sleep 1;
+            ;;
+            *)
+                # TODO
+            ;;
+        esac
+    fi
+}
+
+
+##############
 # *namespace #
-############
+##############
 
 # $1: namespace name
 checkNamespace() {
@@ -159,7 +224,7 @@ getIngressURL() {
 getIngressPort() {
     # Validate
     checkParamOrLog $1 "need param 1: \"http\" or \"https\""
-    ! checkParamIsInList $1 ("http" "https") &&
+    ! checkParamIsInList $1 "http" "https" && \
         logKill "param 1 should be  \"http\" or \"https\""    
     checkParamOrLog $2 "need param 2: ingress-controller service name"
 
@@ -338,7 +403,7 @@ applyPVC() {
     checkParamOrLog $2 "need param 2: storageclass name"
     checkParamOrLog $3 "need param 3: pvc amount"
     checkParamOrLog $4 "need param 4: pvc unit (Gi, Mi)"
-    ! checkParamIsInList $4 ("Gi" "Mi") && \
+    ! checkParamIsInList $4 "Gi" "Mi" && \
         logKill "param 4: pvc unit should be \"Gi\" or \"Mi\""
     checkParamOrLog $5 "need param 5: package name"
     

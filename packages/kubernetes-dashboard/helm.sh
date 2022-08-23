@@ -3,7 +3,7 @@
 # Author: PresentJay (정현재, presentj94@gmail.com)
 
 source ./scripts/kubecheats.sh
-getEnv ./packages/ingress-nginx/.env
+getEnv ./packages/kubernetes-dashboard/.env
 
 case $(checkOpt iub $@) in
     i | install)
@@ -15,9 +15,12 @@ case $(checkOpt iub $@) in
             --version ${INSTALL_VERSION} \
             --namespace ${INSTALL_NAMESPACE} \
             --set metadata.labels.package=${PACKAGE_NAME} \
+            --set extraArgs=\"{--token-ttl=${TOKEN_TTL}}\" \
             --install
     ;;
     u | uninstall | teardown)
-        
+        delete_sequence ingress ${INSTALL_NAME}
+        delete_sequence helm ${INSTALL_NAME} ${INSTALL_NAMESPACE}
+        delete_sequence namespace ${INSTALL_NAMESPACE}
     ;;
 esac

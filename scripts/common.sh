@@ -8,8 +8,8 @@
 # $1: silent mode check (--silent)
 # $@: command
 # examples
-# -> "loop_to_success (somecommand)"
-loop_to_success() {
+# -> "loopToSuccess (somecommand)"
+loopToSuccess() {
     local _silentMode_=$FALSE
     [ $1 = "--silent" ] && _silentMode_=$TRUE
 
@@ -52,21 +52,21 @@ logHelpHead() {
 
 logHelpContent() {
     if [[ $# -gt 2 ]]; then
-        paramCnt=1
+        local _paramCnt_=1
         echo -en "\t["
-        while (( ${paramCnt} < $# )); do
-            case ${{paramCnt}} in
+        while (( ${_paramCnt_} < $# )); do
+            case ${{_paramCnt_}} in
                 1)
                     echo -n "-"
-                    echo -n "${!{paramCnt}}"
+                    echo -n "${!{_paramCnt_}}"
                 ;;
                 *)
-                    echo -n ", --${!{paramCnt}}"
+                    echo -n ", --${!{_paramCnt_}}"
                 ;;
             esac
-            {paramCnt}=$((${{paramCnt}}+1))
+            {_paramCnt_}=$((${{_paramCnt_}}+1))
         done
-        echo -e "]: ${!{paramCnt}}"
+        echo -e "]: ${!{_paramCnt_}}"
     elif [[ $# -eq 2 ]]; then
         echo -e "\t[--$1]: $2"
     fi
@@ -90,10 +90,10 @@ line() {
     if [[ $# -eq 0 ]]; then
         echo -e "\n"
     elif [[ $# -eq 1 ]]; then
-        iter=0
-        until [[ $iter -le $1 ]]; do
+        local _iter_=0
+        until [[ $_iter_ -le $1 ]]; do
             echo -e "\n"
-            iter=$(( iter+1 ))
+            _iter_=$(( _iter_+1 ))
         done
     fi
 }
@@ -105,17 +105,17 @@ line() {
 # param $1: command 동작을 확인하려는 대상
 # example $1: "multipass", "kubectl", ...
 checkPrerequisite() {
-    silentRun=$($1 | grep "command not found: $1") && logKill "$1 unavailable"
-    unset silentRun
+    local _silentRun_=$($1 | grep "command not found: $1") && logKill "$1 unavailable"
+    unset _silentRun_
 }
 
 
 # param $1: dash-param 인자에 대해서 공백 없이, one character
 # example $1: "ie", "a", "iu" ...
 checkOpt() {
-    checkDash=$1
+    local _checkDash_=$1
     shift
-    while getopts ${checkDash}h-: OPT; do
+    while getopts ${_checkDash_}h-: OPT; do
         if [ $OPT = "-" ]; then
             OPT=${OPTARG%%=*}
             OPTARG=${OPTARG#$OPT}
@@ -137,7 +137,7 @@ checkEnv() {
 # explain: 주어진 param 수를 검사
 # $1: param 개수
 checkParamAmount() {
-    _objAmount_=$1
+    local _objAmount_=$1
     shift
     [[ $# -eq $_objAmount_ ]] && echo $TRUE || echo $FALSE
 }
@@ -145,14 +145,14 @@ checkParamAmount() {
 # $1: param
 # $2: param이 없을 때 표시할 메세지
 checkParamOrLog() {
-    _param_=$1
-    _message_=$2
+    local _param_=$1
+    local _message_=$2
     [[ -z $_param_ ]] && logKill $_message_
 }
 
 # $1: namespace option
 checkNamespaceOption() {
-    _namespace_option_=$1
+    local _namespace_option_=$1
     if [[ -z ${_namespace_option_} ]]; then
         echo "default"
     else
@@ -183,9 +183,9 @@ checkYorN() {
 # $1: given param
 # $2: array of param available list (separated with a space) : [something1 something2 ...]
 checkParamIsInList() {
-    _givenParam_=$1
+    local _givenParam_=$1
     shift
-    _availableParamList_=$@
+    local _availableParamList_=$@
 
     for _availableParam_ in ${_availableParamList_[@]}; do
         [ ${_givenParam_} = ${_availableParam_} ] && return $TRUE
@@ -212,13 +212,13 @@ deleteCmd() {
 
 # $1: env file 위치
 getEnv() {
-    ENV_LOC=$1
+    local _envLocation_=$1
 
-    while read line; do
-        if [[ -z $(echo ${line} | grep "#") ]]; then
-            eval $line
+    while read _line_; do
+        if [[ -z $(echo ${_line_} | grep "#") ]]; then
+            eval ${_line_}
         fi
-    done < ${ENV_LOC}
+    done < ${_envLocation_}
 }
 
 # $1: answer variable (will be export)
