@@ -6,7 +6,19 @@
 
 source scripts/common.sh
 
+# TODO: pwd가 프로젝트 루트가 아닌 경우 스크립트가 동작하지 않도록 하는 조건문 추가 필요!
 
+if [[ -e ${KUBECONFIG_LOC} ]]; then
+    export KUBECONFIG=$(pwd)/${KUBECONFIG_LOC}
+    _hostEndpointIP_=$(kubectl config view -o jsonpath="{.clusters[0].cluster.server}" | cut -d"/" -f3 | cut -d":" -f1)
+    _clusterCount_=$(kubectl config view -o jsonpath="{.clusters}" | jq length)
+    _masterNodeIP_=$(kubectl config view -o jsonpath="{.clusters[$((${$_clusterCount_}-1))].cluster.server}" | cut -d"/" -f3 | cut -d":" -f1)
+else
+    echo "***<SYSLOG>***"
+    echo "yet does not configed kubeconfig in your system."
+    echo "if you run this system on multipass, try run [sodas-manager --node init]"
+    echo "***</SYSLOG>***"
+fi
 
 ############
 # *ingress #
@@ -44,9 +56,9 @@ metadata:
 spec:
   tls:
     - hosts:
-        - ${_hostName_}.${LOCAL_ADDRESS}.nip.io
+        - ${_hostName_}.${_masterNodeIP_}.nip.io
   rules:
-    - host: ${_hostName_}.${LOCAL_ADDRESS}.nip.io
+    - host: ${_hostName_}.${_masterNodeIP_}.nip.io
       http:
         paths:
           - path: /
@@ -86,7 +98,7 @@ metadata:
     nginx.ingress.kubernetes.io/proxy-body-size: 1000000m
 spec:
   rules:
-    - host: ${_hostName_}.${LOCAL_ADDRESS}.nip.io
+    - host: ${_hostName_}.${_masterNodeIP_}.nip.io
       http:
         paths:
           - path: /
@@ -273,7 +285,7 @@ getSvcNodePort() {
 # $1: svc name
 # $2: port index
 # #3: namespace name (optional)
-get_svc_port() {
+getSvcPort() {
     # Validate
     checkParamOrLog $1 "need param 1: service name"
     checkParamOrLog $2 "need param 2: port index"
