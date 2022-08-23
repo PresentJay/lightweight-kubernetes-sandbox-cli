@@ -178,9 +178,11 @@ getEnv() {
     done < ${ENV_LOC}
 }
 
-# TODO: Kubeconfig 생성 시 그쪽으로 빼기
+# TODO: Kubeconfig 생성 시 그쪽으로 빼기 (여기 스크립트는 매번 실행)
 ### helm의 config permission error 제거 ###
 chmod o-r ${KUBECONFIG_LOC}
 chmod g-r ${KUBECONFIG_LOC}
 
 get_env "./docker/.env"
+
+# TODO: pwd가 프로젝트 루트가 아닌 경우 스크립트가 동작하지 않도록 하는 조건문 추가 필요!

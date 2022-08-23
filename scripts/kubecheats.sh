@@ -12,15 +12,17 @@
 
 applyIngressNginxHTTPS() {
     # Validate
-    checkParamOrLog $1 "give HostName in first parameter (ex. dashboard.kubernetes)"
-    checkParamOrLog $2 "give ServiceName in second parameter (ex. kubernetes-dashboard)"
-    checkParamOrLog $3 "give Https Port in third parameter (ex. 8443)"
+    checkParamOrLog $1 "need param 1: hostName (ex. dashboard.kubernetes)"
+    checkParamOrLog $2 "need param 2: serviceName (ex. kubernetes-dashboard)"
+    checkParamOrLog $3 "need param 3: httpsPort (ex. 443)"
+    checkParamOrLog $4 "need param 4: package name"
 
     # Check On Eyes Phase
     _hostName_=$1
     _serviceName_=$2
     _httpsPort_=$3
-    _namespace_=$(checkNamespaceOption $4)
+    _packageName_=$4
+    _namespace_=$(checkNamespaceOption $5)
 
     # Do
     cat <<EOF | kubectl apply -f -
@@ -29,6 +31,8 @@ kind: Ingress
 metadata:
   name: $_serviceName_
   namespace: $_namespace_
+  labels:
+    package: $_packageName_
   annotations:
     kubernetes.io/ingress.class: nginx
     nginx.ingress.kubernetes.io/backend-protocol: HTTPS
@@ -52,17 +56,18 @@ EOF
 }
 
 applyIngressNginxHTTP() {
-      # Validate
-    checkParamOrLog $1 "give HostName in first parameter (ex. dashboard.kubernetes)"
-    checkParamOrLog $2 "give ServiceName in second parameter (ex. kubernetes-dashboard)"
-    checkParamOrLog $3 "give Http Port in third parameter (ex. 8080)"
+    # Validate
+    checkParamOrLog $1 "need param 1: hostName (ex. dashboard.kubernetes)"
+    checkParamOrLog $2 "need param 2: serviceName (ex. kubernetes-dashboard)"
+    checkParamOrLog $3 "need param 3: httpPort (ex. 80)"
+    checkParamOrLog $4 "need param 4: package name"
 
     # Check On Eyes Phase
     _hostName_=$1
     _serviceName_=$2
-    _httpsPort_=$3
-    _namespace_=$(checkNamespaceOption $4)
-
+    _httpPort_=$3
+    _packageName_=$4
+    _namespace_=$(checkNamespaceOption $5)
 
     cat <<EOF | kubectl apply -f -
 apiVersion: networking.k8s.io/v1
@@ -70,6 +75,8 @@ kind: Ingress
 metadata:
   name: $_serviceName_
   namespace: $_namespace_
+  labels:
+    package: $_packageName_
   annotations:
     kubernetes.io/ingress.class: nginx
     nginx.ingress.kubernetes.io/proxy-body-size: 1000000m
@@ -84,7 +91,7 @@ spec:
               service:
                 name: ${_serviceName_}
                 port:
-                  number: ${_httpsPort_}
+                  number: ${_httpPort_}
 EOF
 }
 
@@ -288,23 +295,38 @@ get_svc_port() {
 
 # $1: pvc name
 # $2: storageclass name
-# $3: pvc amount (GB unit)
+# $3: pvc amount
+# $4: pvc units (Gi, Mi)
 applyPVC() {
+    # Validate
     checkParamOrLog $1 "need param 1: pvc name"
     checkParamOrLog $2 "need param 2: storageclass name"
-    checkParamOrLog $3 "need param 3: pvc amount (GB unit)"
+    checkParamOrLog $3 "need param 3: pvc amount"
+    checkParamOrLog $4 "need param 4: pvc unit (Gi, Mi)"
+    if [ $1 != "Gi" ] && [ $1 != "Mi" ]; then
+        logKill "param 4: pvc unit should be \"Gi\" or \"Mi\""
+    fi
+    checkParamOrLog $5 "need param 5: package name"
+    
+
+    # Check On Eyes Phase
+    _PVCname_=$1
+    _storageClassName_=$2
+    _PVCamount_=$3
+    _PVCunit_=$4
+    _packageName_=$5
 
     cat <<EOF | kubectl apply -f -
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: $1
+  name: $_PVCname_
 spec:
   accessModes:
     - ReadWriteMany
-  storageClassName: $2
+  storageClassName: $_storageClassName_
   resources:
     requests:
-      storage: $3Gi
+      storage: $3$_
 EOF
 }
