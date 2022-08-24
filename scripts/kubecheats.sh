@@ -143,14 +143,14 @@ metadata:
     package: ${_packageName_}
   annotations:
     kubernetes.io/ingress.class: nginx
-    nginx.ingress.kubernetes.io/backend-protocol: HTTPS
+    nginx.ingress.kubernetes.io/backend-protocol: https
     nginx.ingress.kubernetes.io/proxy-body-size: 1000000m
 spec:
   tls:
     - hosts:
-         ${_hostName_}.${masterNodeIP}.nip.io
+      - ${_hostName_}.${masterNodeIP}.nip.io
   rules:
-     host: ${_hostName_}.${masterNodeIP}.nip.io
+    - host: ${_hostName_}.${masterNodeIP}.nip.io
       http:
         paths:
           - path: /

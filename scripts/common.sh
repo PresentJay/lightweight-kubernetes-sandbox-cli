@@ -11,7 +11,7 @@
 # -> "loopToSuccess (somecommand)"
 loopToSuccess() {
     local _silentMode_=$FALSE
-    [ $1 = "--silent" ] && _silentMode_=$TRUE
+    [ $1 = "--silent" ] && _silentMode_=$TRUE && shift
 
     local _iter_=0
     while :
@@ -55,18 +55,18 @@ logHelpContent() {
         local _paramCnt_=1
         echo -en "\t["
         while (( ${_paramCnt_} < $# )); do
-            case ${{_paramCnt_}} in
+            case ${_paramCnt_} in
                 1)
                     echo -n "-"
-                    echo -n "${!{_paramCnt_}}"
+                    echo -n "${!_paramCnt_}"
                 ;;
                 *)
-                    echo -n ", --${!{_paramCnt_}}"
+                    echo -n ", --${!_paramCnt_}"
                 ;;
             esac
-            {_paramCnt_}=$((${{_paramCnt_}}+1))
+            _paramCnt_=$(( _paramCnt_ + 1 ))
         done
-        echo -e "]: ${!{_paramCnt_}}"
+        echo -e "]: ${!_paramCnt_}"
     elif [[ $# -eq 2 ]]; then
         echo -e "\t[--$1]: $2"
     fi
@@ -164,7 +164,8 @@ checkNamespaceOption() {
 # no param
 checkOS() {
     case $(uname -s) in
-        "Darwin"* | "Linux"*) _OSname_="linux" ;;
+        "Darwin"*) _OSname_="mac" ;;
+        "Linux"*) _OSname_="linux" ;;
         "MINGW32"* | "MINGW64"* | "CYGWIN" ) _OSname_="win" ;;
         *) logKill "this OS($(uname -s)) is not supported yet." ;;
     esac
@@ -234,6 +235,15 @@ getYorN() {
         logInfo "write just 'y' or 'n' please"
     done
     eval "$1=${temp}"
+}
+
+# $1: uri string
+openURI() {
+    case $(checkOS) in
+        linux) echo "$1" ;;
+        win) start "$1" ;;
+        mac) open "$1" ;;
+    esac
 }
 
 
