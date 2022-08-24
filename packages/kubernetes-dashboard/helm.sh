@@ -14,13 +14,19 @@ case $(checkOpt iub $@) in
         helm upgrade ${INSTALL_NAME} ${CHART_REPOSITORY_NAME}/${CHART_REPOSITORY_ORG} \
             --version ${INSTALL_VERSION} \
             --namespace ${INSTALL_NAMESPACE} \
+            --set extraArgs={--token-ttl=${TOKEN_TTL}} \
             --set metadata.labels.package=${PACKAGE_NAME} \
-            --set extraArgs=\"{--token-ttl=${TOKEN_TTL}}\" \
             --install
     ;;
     u | uninstall | teardown)
-        delete_sequence ingress ${INSTALL_NAME}
-        delete_sequence helm ${INSTALL_NAME} ${INSTALL_NAMESPACE}
-        delete_sequence namespace ${INSTALL_NAMESPACE}
+        deleteSequence ingress ${INSTALL_NAME}
+        deleteSequence helm ${INSTALL_NAME} ${INSTALL_NAMESPACE}
+        deleteSequence namespace ${INSTALL_NAMESPACE}
+    ;;
+    h | help | ? | *)
+        logHelpHead "packages/kubernetes-dashboard/helm.sh"
+        logHelpContent i install "install kubernetes-dashboard package"
+        logHelpContent u uninstall "uninstall kubernetes-dashboard package"
+        logHelpTail
     ;;
 esac

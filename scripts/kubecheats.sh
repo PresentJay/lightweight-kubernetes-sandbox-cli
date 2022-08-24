@@ -33,15 +33,15 @@ checkObject() {
     checkParamOrLog $2 "need param 2: kubernetes object name"
 
     # Check On Eyes Phase
-    local _ObjType_=$1
-    local _ObjName_=$2
+    local _objType_=$1
+    local _objName_=$2
     local _namespace_=$(checkNamespaceOption $3)
 
     # Do
-    if [[ -n $(kubectl get ${_ObjType_} ${_ObjName_} -n ${_namespace_}) ]]; then
+    if [[ -n $(kubectl get ${_objType_} -n ${_namespace_} | grep ${_objName_}) ]]; then
         return $TRUE
     else
-        logInfo "${_ObjType_}/${_ObjName_} could not found. . . BREAK"
+        logInfo "${_objType_}/${_objName_} could not found. . . BREAK"
         return $FALSE
     fi
 }
@@ -63,7 +63,7 @@ deleteSequence() {
         ! checkHelm ${_objectName_} ${_namespace_} \
             && logInfo "helm/${_objectName_} could not found. . . BREAK" \
             && return $FALSE \
-            || helm uninstall ${_objectName_} -n ${_namespace_} 
+            || helm uninstall ${_objectName_} -n ${_namespace_}
     else
         checkObject ${_objectType_} ${_objectName_} ${_namespace_} \
             && loopToSuccess "kubectl delete ${_objectType_} ${_objectName_} -n ${_namespace_}" \

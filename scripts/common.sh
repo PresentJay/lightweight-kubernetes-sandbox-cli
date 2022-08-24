@@ -105,7 +105,7 @@ line() {
 # param $1: command 동작을 확인하려는 대상
 # example $1: "multipass", "kubectl", ...
 checkPrerequisite() {
-    local _silentRun_=$($1 | grep "command not found: $1") && logKill "$1 unavailable"
+    local _silentRun_=$($1 | grep "command not found: $1" && logKill "$1 unavailable")
     unset _silentRun_
 }
 
@@ -156,8 +156,8 @@ checkNamespaceOption() {
     if [[ -z ${_namespace_option_} ]]; then
         echo "default"
     else
-        echo ${namespace_option}
-    fi        
+        echo ${_namespace_option_}
+    fi
 }
 
 # explain: OS를 확인하여 mac, linux, windows 구분

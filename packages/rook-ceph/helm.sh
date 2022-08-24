@@ -15,16 +15,10 @@ case $(checkOpt iub $@) in
     u | uninstall | teardown)
 
     ;;
-    conf-update)
-
-    ;;
-    conf-delete)
-
-    ;;
-    conf-check)
-
-    ;;
-    conf-add)
-
+    h | help | ? | *)
+        logHelpHead "packages/ingress-nginx/helm.sh"
+        logHelpContent i install "install ingress-nginx package"
+        logHelpContent u uninstall "uninstall ingress-nginx package"
+        logHelpTail
     ;;
 esac
