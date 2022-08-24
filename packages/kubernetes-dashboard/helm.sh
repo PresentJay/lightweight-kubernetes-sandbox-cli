@@ -14,9 +14,10 @@ case $(checkOpt iub $@) in
         helm upgrade ${INSTALL_NAME} ${CHART_REPOSITORY_NAME}/${CHART_REPOSITORY_ORG} \
             --version ${INSTALL_VERSION} \
             --namespace ${INSTALL_NAMESPACE} \
-            --set extraArgs={--token-ttl=${TOKEN_TTL}} \
+            --set extraArgs=\"{--token-ttl=${TOKEN_TTL}}\" \
             --set metadata.labels.package=${PACKAGE_NAME} \
             --install
+        applyIngressNginxHTTPS dashboard.k8s ${INSTALL_NAME} 443 ${PACKAGE_NAME} ${INSTALL_NAMESPACE}
     ;;
     u | uninstall | teardown)
         deleteSequence ingress ${INSTALL_NAME}

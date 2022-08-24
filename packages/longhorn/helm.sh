@@ -10,21 +10,15 @@ checkPrerequisite kubectl
 
 case $(checkOpt iub $@) in
     i | install)
-
+        
     ;;
     u | uninstall | teardown)
 
     ;;
-    conf-update)
-
-    ;;
-    conf-delete)
-
-    ;;
-    conf-check)
-
-    ;;
-    conf-add)
-
+    h | help | ? | *)
+        logHelpHead "packages/longhorn/helm.sh"
+        logHelpContent i install "install longhorn package"
+        logHelpContent u uninstall "uninstall longhorn package"
+        logHelpTail
     ;;
 esac

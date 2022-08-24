@@ -15,10 +15,12 @@ case $(checkOpt iub $@) in
             --version ${INSTALL_VERSION} \
             --namespace ${INSTALL_NAMESPACE} \
             --set metadata.labels.package=${PACKAGE_NAME} \
-            --install
+            --install 
     ;;
     u | uninstall | teardown)
-
+        deleteSequence helm ${INSTALL_NAME} ${INSTALL_NAMESPACE}
+        deleteSequence namespace ${INSTALL_NAMESPACE}
+        deleteSequence helm-repo ${CHART_REPOSITORY_NAME}
     ;;
     h | help | ? | *)
         logHelpHead "packages/ingress-nginx/helm.sh"

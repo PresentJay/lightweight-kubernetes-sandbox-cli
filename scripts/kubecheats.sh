@@ -59,33 +59,42 @@ deleteSequence() {
     local _objectName_=$2
     local _namespace_=$(checkNamespaceOption $3)
     
-    if [[ ${_objectType_} = "helm" ]]; then
-        ! checkHelm ${_objectName_} ${_namespace_} \
-            && logInfo "helm/${_objectName_} could not found. . . BREAK" \
-            && return $FALSE \
-            || helm uninstall ${_objectName_} -n ${_namespace_}
-    else
-        checkObject ${_objectType_} ${_objectName_} ${_namespace_} \
-            && loopToSuccess "kubectl delete ${_objectType_} ${_objectName_} -n ${_namespace_}" \
-            || return $FALSE
-        case $1 in
-            deployment)
-                # TODO
-            ;;
-            job)
-                # TODO
-            ;;
-            statefulset)
-                # TODO
-            ;;
-            configmap | service | secret | pv)
-                sleep 1;
-            ;;
-            *)
-                # TODO
-            ;;
-        esac
-    fi
+    case ${_objectType_} in
+        helm)
+            checkHelm ${_objectName_} ${_namespace_} \
+                && loopToSuccess "helm uninstall ${_objectName_} -n ${_namespace_}"
+        ;;
+        helm-repo)
+            checkHelmRepo ${_objectName_} \
+                && loopToSuccess "helm repo remove ${_objectName_}"
+        ;;
+        namespace)
+            checkNamespace ${_objectName_} \
+                && loopToSuccess "kubectl delete ${_objectType_} ${_objectName_}"
+        ;;
+        *)
+            checkObject ${_objectType_} ${_objectName_} ${_namespace_} \
+                && loopToSuccess "kubectl delete ${_objectType_} ${_objectName_} -n ${_namespace_}"
+                
+            case ${_objectType_} in
+                deployment)
+                    # TODO
+                ;;
+                job)
+                    # TODO
+                ;;
+                statefulset)
+                    # TODO
+                ;;
+                configmap | service | secret | pv)
+                    sleep 1;
+                ;;
+                *)
+                    # TODO
+                ;;
+            esac
+        ;;
+    esac
 }
 
 
@@ -139,9 +148,9 @@ metadata:
 spec:
   tls:
     - hosts:
-         ${_hostName_}.${_masterNodeIP}.nip.io
+         ${_hostName_}.${masterNodeIP}.nip.io
   rules:
-     host: ${_hostName_}.${_masterNodeIP}.nip.io
+     host: ${_hostName_}.${masterNodeIP}.nip.io
       http:
         paths:
           - path: /
@@ -181,7 +190,7 @@ metadata:
     nginx.ingress.kubernetes.io/proxy-body-size: 1000000m
 spec:
   rules:
-     host: ${_hostName_}.${_masterNodeIP}.nip.io
+     host: ${_hostName_}.${masterNodeIP}.nip.io
       http:
         paths:
           - path: /
