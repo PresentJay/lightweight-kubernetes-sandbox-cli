@@ -72,6 +72,10 @@ deleteSequence() {
             checkNamespace ${_objectName_} \
                 && loopToSuccess "kubectl delete ${_objectType_} ${_objectName_}"
         ;;
+        serviceaccount | clusterrolebinding)
+            checkObject ${_objectType_} ${_objectName_} \
+                && loopToSuccess "kubectl delete ${_objectType_} ${_objectName_}"
+        ;;
         *)
             checkObject ${_objectType_} ${_objectName_} ${_namespace_} \
                 && loopToSuccess "kubectl delete ${_objectType_} ${_objectName_} -n ${_namespace_}"
@@ -85,9 +89,6 @@ deleteSequence() {
                 ;;
                 statefulset)
                     # TODO
-                ;;
-                configmap | service | secret | pv)
-                    sleep 1;
                 ;;
                 *)
                     # TODO
@@ -406,6 +407,8 @@ getSvcPort() {
 # $2: storageclass name
 # $3: pvc amount
 # $4: pvc units (Gi, Mi)
+# $5: package name
+# $6: namespace (optional)
 applyPVC() {
     # Validate
     checkParamOrLog $1 "need param 1: pvc name"
@@ -416,19 +419,22 @@ applyPVC() {
         logKill "param 4: pvc unit should be \"Gi\" or \"Mi\""
     checkParamOrLog $5 "need param 5: package name"
     
-
     # Check On Eyes Phase
     local _PVCname_=$1
     local _storageClassName_=$2
     local _PVCamount_=$3
     local _PVCunit_=$4
     local _packageName_=$5
+    local _namespace_=$(checkNamespaceOption $6)
 
     cat <<EOF | kubectl apply -f -
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: ${_PVCname_}
+  namespace: ${_namespace_}
+  labels:
+    package: ${_packageName_}
 spec:
   accessModes:
     - ReadWriteMany
@@ -438,6 +444,71 @@ spec:
       storage: ${_PVCamount_}${_PVCunit_}
 EOF
 }
+
+
+###################
+# *ServiceAccount #
+###################
+
+# # # CREATE (apply can create and update) # # #
+
+# param $1: ServiceAccountname
+# param $2: namespace (optional)
+createSA() {
+    # Validate
+    checkParamOrLog $1 "need param 1: ServiceAccount name"
+
+    # Check On Eyes Phase
+    local _SAname_=$1
+    local _namespace_=$(checkNamespaceOption $2)
+
+    # Do
+    cat <<EOF | kubectl apply -f -
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: ${_SAname_}
+  namespace: ${_namespace_}
+EOF
+}
+
+
+#######################
+# *ClusterRoleBinding #
+#######################
+
+# # # CREATE (apply can create and update) # # #
+
+# param $1: ServiceAccount name
+# param $2: Role name
+# param $3: namespace (optional)
+createCRB() {
+    # Validate
+    checkParamOrLog $1 "need param 1: ServiceAccount name"
+    checkParamOrLog $2 "need param 2: Role name"
+
+    # Check On Eyes Phase
+    local _SAname_=$1
+    local _roleName_=$2
+    local _namespace_=$(checkNamespaceOption $3)
+
+    # Do
+    cat <<EOF | kubectl apply -f -
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: ${_SAname_}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: ${_roleName_}
+subjects:
+  - kind: ServiceAccount
+    name: ${_SAname_}
+    namespace: ${_namespace_}
+EOF
+}
+
 
 
 #########

@@ -14,7 +14,6 @@ case $(checkOpt iu $@) in
         helm upgrade ${INSTALL_NAME} ${CHART_REPOSITORY_NAME}/${CHART_REPOSITORY_ORG} \
             --version ${INSTALL_VERSION} \
             --namespace ${INSTALL_NAMESPACE} \
-            --set metadata.labels.package=${PACKAGE_NAME} \
             --install 
     ;;
     u | uninstall | teardown)

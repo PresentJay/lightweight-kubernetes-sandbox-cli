@@ -11,7 +11,7 @@
 # -> "loopToSuccess (somecommand)"
 loopToSuccess() {
     local _silentMode_=$FALSE
-    [ $1 = "--silent" ] && _silentMode_=$TRUE && shift
+    [[ $1 = "--silent" ]] && _silentMode_=$TRUE && shift
 
     local _iter_=0
     while :
@@ -239,8 +239,8 @@ getYorN() {
 
 # $1: uri string
 openURI() {
+    echo "$1"
     case $(checkOS) in
-        linux) echo "$1" ;;
         win) start "$1" ;;
         mac) open "$1" ;;
     esac
