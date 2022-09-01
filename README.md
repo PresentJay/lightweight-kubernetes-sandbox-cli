@@ -21,6 +21,11 @@
      - teardown: `bash packages/kubernetes-dashboard/helm.sh -u`
      - open dashboard: `bash packages/kubernetes-dashboard/helm.sh --open`
      - get login token: `bash packages/kubernetes-dashboard/helm.sh --token`
+5. longhorn package 설치
+   - `bash packages/longhorn/helm.sh -i`
+     - teardown: `bash packages/longhorn/helm.sh -u`
+     - open dashboard: `bash packages/longhorn/helm.sh --open`
+
 
 # Tips
 

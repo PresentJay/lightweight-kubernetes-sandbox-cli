@@ -14,11 +14,11 @@ case $(checkOpt iu $@) in
         helm upgrade ${INSTALL_NAME} ${CHART_REPOSITORY_NAME}/${CHART_REPOSITORY_ORG} \
             --version ${INSTALL_VERSION} \
             --namespace ${INSTALL_NAMESPACE} \
-            --set extraArgs=${EXTRAARGS} \
+            --set=extraArgs=${EXTRAARGS} \
             --install
         createSA admin-user ${INSTALL_NAMESPACE}
         createCRB admin-user cluster-admin ${INSTALL_NAMESPACE}
-        applyIngressNginxHTTPS ${INGRESS_HOSTNAME} ${INSTALL_NAME} ${INGRESS_PORT} ${PACKAGE_LABEL} ${INSTALL_NAMESPACE}
+        applyIngressNginxHTTPS ${INGRESS_HOSTNAME} ${INGRESS_SERVICE} ${INGRESS_PORT} ${PACKAGE_LABEL} ${INSTALL_NAMESPACE}
     ;;
     u | uninstall | teardown)
         deleteSequence ingress ${INSTALL_NAME}
