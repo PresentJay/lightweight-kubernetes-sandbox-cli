@@ -11,7 +11,7 @@ case $(checkOpt iu $@) in
             helm repo add ${CHART_REPOSITORY_NAME} ${CHART_REGISTRY} && helm repo update
         ! checkNamespace ${INSTALL_NAMESPACE} && \
             kubectl create namespace ${INSTALL_NAMESPACE}
-        helm upgrade ${INSTALL_NAME} ${CHART_REPOSITORY_NAME}/${CHART_REPOSITORY_ORG} \
+        helm upgrade ${INSTALL_NAME} ${CHART_REPOSITORY_ORG}/${CHART_REPOSITORY_NAME} \
             --version ${INSTALL_VERSION} \
             --namespace ${INSTALL_NAMESPACE} \
             --install

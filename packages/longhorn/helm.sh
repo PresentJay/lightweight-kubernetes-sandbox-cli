@@ -13,14 +13,14 @@ case $(checkOpt iub $@) in
             kubectl create namespace ${INSTALL_NAMESPACE}
         case $(checkOS) in
             "linux" | "mac")
-                helm upgrade ${INSTALL_NAME} ${CHART_REPOSITORY_NAME}/${CHART_REPOSITORY_ORG} \
+                helm upgrade ${INSTALL_NAME} ${CHART_REPOSITORY_ORG}/${CHART_REPOSITORY_NAME} \
                     --version ${INSTALL_VERSION} \
                     --namespace ${INSTALL_NAMESPACE} \
                     --set csi.kubeletRootDir=/var/lib/kubelet \
                     --install
             ;;
             "win")
-                helm upgrade ${INSTALL_NAME} ${CHART_REPOSITORY_NAME}/${CHART_REPOSITORY_ORG} \
+                helm upgrade ${INSTALL_NAME} ${CHART_REPOSITORY_ORG}/${CHART_REPOSITORY_NAME} \
                     --version ${INSTALL_VERSION} \
                     --namespace ${INSTALL_NAMESPACE} \
                     --install
