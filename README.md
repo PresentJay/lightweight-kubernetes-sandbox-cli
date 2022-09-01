@@ -25,6 +25,11 @@
    - `bash packages/longhorn/helm.sh -i`
      - teardown: `bash packages/longhorn/helm.sh -u`
      - open dashboard: `bash packages/longhorn/helm.sh --open`
+6. prometheus+grafana package 설치
+   - `bash packages/prometheus/helm.sh -i`
+     - teardown: `bash packages/prometheus/helm.sh -u`
+     - open dashboard(prometheus): `bash packages/prometheus/helm.sh --open prom`
+     - open dashboard(grafana): `bash packages/prometheus/helm.sh --open grafana`
 
 
 # Tips
@@ -37,4 +42,4 @@
 # TODO
 - [ ] Istio 적용: https://m.blog.naver.com/freepsw/221919196101 
 - [ ] 예거 트레이싱 적용: https://github.com/jaegertracing/jaeger
-- [ ] 
+- [x] prometheus+grafana 적용

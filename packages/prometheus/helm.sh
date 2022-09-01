@@ -18,6 +18,7 @@ case $(checkOpt iub $@) in
             --version ${INSTALL_VERSION} \
             --set prometheus-node-exporter.hostRootFsMount.enabled=false \
             --set grafana.adminPassword=${GRAFANA_ADMIN_PASSWORD} \
+            --set prometheusOperator.tls.enabled=false \
             --set prometheus.prometheusSpec.storageSpec.volumeClaimTemplate.spec.storageClassName=${STORAGE} \
             --set prometheus.prometheusSpec.storageSpec.volumeClaimTemplate.spec.accessModes[0]=ReadWriteOnce \
             --set prometheus.prometheusSpec.storageSpec.volumeClaimTemplate.spec.resources.requests.storage=${PROMETHEUS_PVC_SIZE}
