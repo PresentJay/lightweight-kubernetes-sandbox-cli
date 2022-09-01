@@ -14,7 +14,7 @@ case $(checkOpt iu $@) in
         helm upgrade ${INSTALL_NAME} ${CHART_REPOSITORY_NAME}/${CHART_REPOSITORY_ORG} \
             --version ${INSTALL_VERSION} \
             --namespace ${INSTALL_NAMESPACE} \
-            --install 
+            --install
     ;;
     u | uninstall | teardown)
         deleteSequence helm ${INSTALL_NAME} ${INSTALL_NAMESPACE}
