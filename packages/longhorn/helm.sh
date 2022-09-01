@@ -50,6 +50,7 @@ case $(checkOpt iub $@) in
         logHelpHead "packages/longhorn/helm.sh"
         logHelpContent i install "install longhorn package"
         logHelpContent u uninstall "uninstall longhorn package"
+        logHelpContent open "open longhorn dashboard web"
         logHelpTail
     ;;
 esac

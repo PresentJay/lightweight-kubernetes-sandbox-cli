@@ -49,6 +49,8 @@ case $(checkOpt iu $@) in
         logHelpHead "packages/kubernetes-dashboard/helm.sh"
         logHelpContent i install "install kubernetes-dashboard package"
         logHelpContent u uninstall "uninstall kubernetes-dashboard package"
+        logHelpContent open "open kubernetes-dashboard web"
+        logHelpContent token "get kubernetes-dashboard admin token"
         logHelpTail
     ;;
 esac

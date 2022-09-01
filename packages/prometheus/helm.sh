@@ -33,30 +33,37 @@ case $(checkOpt iub $@) in
         deleteSequence helm-repo ${CHART_REPOSITORY_NAME}
         deleteSequence namespace ${INSTALL_NAMESPACE}
     ;;
-    open-prometheus | prometheus | prom | open-prom)
-        if checkParamIsInList ${PROMETHEUS_INGRESS_PROTOCOL} http https; then
-            _HOSTURL_="${PROMETHEUS_INGRESS_HOSTNAME}.${masterNodeIP}.nip.io"
-            _PORT_=$(bash packages/ingress-nginx/helm.sh --${PROMETHEUS_INGRESS_PROTOCOL}Port)
-            _OPENURI_="${PROMETHEUS_INGRESS_PROTOCOL}://${_HOSTURL_}:${_PORT_}"
+    open)
+        case $2 in
+            prom | prometheus)
+                _protocol_=${PROMETHEUS_INGRESS_PROTOCOL}
+                _hostname_=${PROMETHEUS_INGRESS_HOSTNAME}
+            ;;
+            grafana)
+                _protocol_=${GRAFANA_INGRESS_PROTOCOL}
+                _hostname_=${GRAFANA_INGRESS_HOSTNAME}
+            ;;
+            h | help | ? | *)
+                logHelpHeadNoDash "packages/prometheus/helm.sh --open"
+                logHelpContentNoDash prometheus prom "open prometheus dashboard"
+                logHelpContentNoDash grafana "open grafana dashboard"
+                logHelpTail
+            ;;
+        esac
+        if checkParamIsInList ${_protocol_} http https; then
+            _HOSTURL_="${_hostname_}.${masterNodeIP}.nip.io"
+            _PORT_=$(bash packages/ingress-nginx/helm.sh --${_protocol_}Port)
+            _OPENURI_="${_protocol_}://${_HOSTURL_}:${_PORT_}"
             openURI ${_OPENURI_}
         else
-            logKill "please set PROMETHEUS_INGRESS_PROTOCOL to http or https only. (in .env)"
-        fi
-    ;;
-    open-grafana | grafana)
-        if checkParamIsInList ${GRAFANA_INGRESS_PROTOCOL} http https; then
-            _HOSTURL_="${GRAFANA_INGRESS_HOSTNAME}.${masterNodeIP}.nip.io"
-            _PORT_=$(bash packages/ingress-nginx/helm.sh --${GRAFANA_INGRESS_PROTOCOL}Port)
-            _OPENURI_="${GRAFANA_INGRESS_PROTOCOL}://${_HOSTURL_}:${_PORT_}"
-            openURI ${_OPENURI_}
-        else
-            logKill "please set PROMETHEUS_INGRESS_PROTOCOL to http or https only. (in .env)"
+            logKill "please set $2 protocol to http or https only. (in .env)"
         fi
     ;;
     h | help | ? | *)
         logHelpHead "packages/prometheus/helm.sh"
         logHelpContent i install "install prometheus package"
         logHelpContent u uninstall "uninstall prometheus package"
+        logHelpContent open "open prometheus package web (grafana, prometheus)"
         logHelpTail
     ;;
 esac

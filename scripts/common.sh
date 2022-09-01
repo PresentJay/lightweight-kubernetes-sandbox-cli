@@ -50,6 +50,11 @@ logHelpHead() {
     logHelpContent h help "print help messages"
 }
 
+logHelpHeadNoDash() {
+    echo -e "\n$1 [Options ...]"
+    logHelpContentNoDash h help "print help messages"
+}
+
 logHelpContent() {
     if [[ $# -gt 2 ]]; then
         local _paramCnt_=1
@@ -69,6 +74,27 @@ logHelpContent() {
         echo -e "]: ${!_paramCnt_}"
     elif [[ $# -eq 2 ]]; then
         echo -e "\t[--$1]: $2"
+    fi
+}
+
+logHelpContentNoDash() {
+    if [[ $# -gt 2 ]]; then
+        local _paramCnt_=1
+        echo -en "\t["
+        while (( ${_paramCnt_} < $# )); do
+            case ${_paramCnt_} in
+                1)
+                    echo -n "${!_paramCnt_}"
+                ;;
+                *)
+                    echo -n ", ${!_paramCnt_}"
+                ;;
+            esac
+            _paramCnt_=$(( _paramCnt_ + 1 ))
+        done
+        echo -e "]: ${!_paramCnt_}"
+    elif [[ $# -eq 2 ]]; then
+        echo -e "\t[$1]: $2"
     fi
 }
 
