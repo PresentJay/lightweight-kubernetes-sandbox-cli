@@ -30,8 +30,12 @@ case $(checkOpt iub $@) in
         esac
         applyIngressNginxHTTP ${INGRESS_HOSTNAME} ${INGRESS_SERVICE} ${INGRESS_PORT} ${PACKAGE_LABEL} ${INSTALL_NAMESPACE}
     ;;
+    add-monitor)
+        loopToSuccess "applyServiceMonitor ${METRIC_NAME} ${METRIC_PORTNAME} ${METRIC_LABEL_TYPE} ${METRIC_LABEL_VALUE} ${INSTALL_NAMESPACE}"
+    ;;
     u | uninstall | teardown)
         deleteSequence ingress ${INSTALL_NAME} ${INSTALL_NAMESPACE}
+        deleteSequence ServiceMonitor ${METRIC_NAME} ${INSTALL_NAMESPACE}
         deleteSequence helm ${INSTALL_NAME} ${INSTALL_NAMESPACE}
         deleteSequence namespace ${INSTALL_NAMESPACE}
         deleteSequence helm-repo ${CHART_REPOSITORY_NAME}

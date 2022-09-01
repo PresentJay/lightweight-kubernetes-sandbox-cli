@@ -536,3 +536,41 @@ checkHelm() {
         return $FALSE
     fi
 }
+
+
+###########################
+# *Monitoring(Prometheus) #
+###########################
+
+applyServiceMonitor() {
+    # Validate
+    checkParamOrLog $1 "need param 1: monitorName (ex. longhorn-manager-monitor)"
+    checkParamOrLog $2 "need param 2: portName (ex. manager)"
+    checkParamOrLog $3 "need param 3: labelName (ex. app)"
+    checkParamOrLog $4 "need param 4: labelValue (ex. longhorn-manager)"
+
+    # Check On Eyes Phase
+    local _monitorName=$1
+    local _portName_=$2
+    local _labelName_=$3
+    local _labelValue_=$4
+    local _namespace_=$(checkNamespaceOption $5)
+
+    # Do
+    cat <<EOF | kubectl apply -f -
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: ${_monitorName}
+  namespace: ${_namespace_}
+spec:
+  selector:
+    matchLabels:
+      ${_labelName_}: ${_labelValue_}
+  namespaceSelector:
+    matchNames:
+      - ${_namespace_}
+  endpoints:
+  - port: ${_portName_}
+EOF
+}
