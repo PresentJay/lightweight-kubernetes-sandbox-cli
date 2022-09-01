@@ -21,9 +21,12 @@ case $(checkOpt iub $@) in
             --set prometheusOperator.tls.enabled=false \
             --set prometheus.prometheusSpec.storageSpec.volumeClaimTemplate.spec.storageClassName=${STORAGE} \
             --set prometheus.prometheusSpec.storageSpec.volumeClaimTemplate.spec.accessModes[0]=ReadWriteOnce \
-            --set prometheus.prometheusSpec.storageSpec.volumeClaimTemplate.spec.resources.requests.storage=${PROMETHEUS_PVC_SIZE}
+            --set prometheus.prometheusSpec.storageSpec.volumeClaimTemplate.spec.resources.requests.storage=${PROMETHEUS_PVC_SIZE} \
+            --set prometheus.prometheusSpec.podMonitorSelectorNilUsesHelmValues=false \
+            --set prometheus.prometheusSpec.serviceMonitorSelectorNilUsesHelmValues=false
             # https://github.com/prometheus-community/helm-charts/issues/467
             # container 환경에서 rootFS mount를 방지하게 하기 위한 설정 추가: prometheus-node-exporter.hostRootFsMount.enabled=false
+            # metric/servicemonitor를 namespace 바깥에서도 볼 수 있게 하기 위한 설정 추가: podMonitorSelectorNilUsesHelmValues, serviceMonitorSelectorNilUsesHelmValues
         applyIngressNginxHTTP ${PROMETHEUS_INGRESS_HOSTNAME} ${PROMETHEUS_INGRESS_SERVICE} ${PROMETHEUS_INGRESS_PORT} ${PACKAGE_LABEL} ${INSTALL_NAMESPACE}
         applyIngressNginxHTTP ${GRAFANA_INGRESS_HOSTNAME} ${GRAFANA_INGRESS_SERVICE} ${GRAFANA_INGRESS_PORT} ${PACKAGE_LABEL} ${INSTALL_NAMESPACE}
     ;;

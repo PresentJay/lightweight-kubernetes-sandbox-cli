@@ -15,7 +15,11 @@ case $(checkOpt iu $@) in
             --version ${INSTALL_VERSION} \
             --namespace ${INSTALL_NAMESPACE} \
             --install \
-            --no-hooks
+            --no-hooks \
+            --set controller.metrics.enabled=true \
+            --set controller.metrics.serviceMonitor.enabled=true \
+            --set-string controller.podAnnotations."prometheus\.io/scrape"=true \
+            --set-string controller.podAnnotations."prometheus\.io/port"="10254"
     ;;
     u | uninstall | teardown)
         deleteSequence helm ${INSTALL_NAME} ${INSTALL_NAMESPACE}
