@@ -17,19 +17,21 @@ case $(checkOpt iub $@) in
                     --version ${INSTALL_VERSION} \
                     --namespace ${INSTALL_NAMESPACE} \
                     --set csi.kubeletRootDir=/var/lib/kubelet \
-                    --install
+                    --install \
+                    --no-hooks
             ;;
             "win")
                 helm upgrade ${INSTALL_NAME} ${CHART_REPOSITORY_ORG}/${CHART_REPOSITORY_NAME} \
                     --version ${INSTALL_VERSION} \
                     --namespace ${INSTALL_NAMESPACE} \
-                    --install
+                    --install \
+                    --no-hooks
             ;;
         esac
         applyIngressNginxHTTP ${INGRESS_HOSTNAME} ${INGRESS_SERVICE} ${INGRESS_PORT} ${PACKAGE_LABEL} ${INSTALL_NAMESPACE}
     ;;
     u | uninstall | teardown)
-        deleteSequence ingress ${INSTALL_NAME}
+        deleteSequence ingress ${INSTALL_NAME} ${INSTALL_NAMESPACE}
         deleteSequence helm ${INSTALL_NAME} ${INSTALL_NAMESPACE}
         deleteSequence namespace ${INSTALL_NAMESPACE}
         deleteSequence helm-repo ${CHART_REPOSITORY_NAME}

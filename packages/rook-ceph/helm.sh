@@ -16,9 +16,9 @@ case $(checkOpt iub $@) in
 
     ;;
     h | help | ? | *)
-        logHelpHead "packages/ingress-nginx/helm.sh"
-        logHelpContent i install "install ingress-nginx package"
-        logHelpContent u uninstall "uninstall ingress-nginx package"
+        logHelpHead "packages/rook-ceph/helm.sh"
+        logHelpContent i install "install rook-ceph package"
+        logHelpContent u uninstall "uninstall rook-ceph package"
         logHelpTail
     ;;
 esac

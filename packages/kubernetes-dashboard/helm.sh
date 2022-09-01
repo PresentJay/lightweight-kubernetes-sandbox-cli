@@ -15,13 +15,14 @@ case $(checkOpt iu $@) in
             --version ${INSTALL_VERSION} \
             --namespace ${INSTALL_NAMESPACE} \
             --set=extraArgs=${EXTRAARGS} \
-            --install
+            --install \
+            --no-hooks
         createSA admin-user ${INSTALL_NAMESPACE}
         createCRB admin-user cluster-admin ${INSTALL_NAMESPACE}
         applyIngressNginxHTTPS ${INGRESS_HOSTNAME} ${INGRESS_SERVICE} ${INGRESS_PORT} ${PACKAGE_LABEL} ${INSTALL_NAMESPACE}
     ;;
     u | uninstall | teardown)
-        deleteSequence ingress ${INSTALL_NAME}
+        deleteSequence ingress ${INSTALL_NAME} ${INSTALL_NAMESPACE}
         deleteSequence serviceaccount admin-user ${INSTALL_NAMESPACE}
         deleteSequence clusterrolebinding admin-user
         deleteSequence helm ${INSTALL_NAME} ${INSTALL_NAMESPACE}
