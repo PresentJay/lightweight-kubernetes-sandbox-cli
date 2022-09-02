@@ -41,5 +41,13 @@
 
 # TODO
 - [ ] Istio 적용: https://m.blog.naver.com/freepsw/221919196101 
+  - [ ] 참고1: https://itnext.io/traffic-management-using-istio-b49663da3e8d
+  - [ ] 참고2 (공식doc): https://istio.io/latest/docs/
+  - [ ] 참고3: https://www.redhat.com/en/topics/microservices/what-is-a-service-mesh
+  - [ ] 
 - [ ] 예거 트레이싱 적용: https://github.com/jaegertracing/jaeger
 - [x] prometheus+grafana 적용
+- [ ] Kubernetes Resource를 이해하기 위한 좋은 포스팅
+  - [ ] https://shonlevran.medium.com/kubernetes-resources-under-the-hood-part-1-4f2400b6bb96
+  - [ ] https://shonlevran.medium.com/kubernetes-resources-under-the-hood-part-2-6eeb50197c44
+  - [ ] https://shonlevran.medium.com/kubernetes-resources-under-the-hood-part-3-6ee7d6015965

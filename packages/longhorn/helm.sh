@@ -31,7 +31,7 @@ case $(checkOpt iub $@) in
         applyIngressNginxHTTP ${INGRESS_HOSTNAME} ${INGRESS_SERVICE} ${INGRESS_PORT} ${PACKAGE_LABEL} ${INSTALL_NAMESPACE}
     ;;
     add-monitor)
-        loopToSuccess "applyServiceMonitor ${METRIC_NAME} ${METRIC_PORTNAME} ${METRIC_LABEL_TYPE} ${METRIC_LABEL_VALUE} ${INSTALL_NAMESPACE}"
+        applyServiceMonitor ${METRIC_NAME} ${METRIC_PORTNAME} ${METRIC_LABEL_TYPE} ${METRIC_LABEL_VALUE} ${INSTALL_NAMESPACE}
     ;;
     u | uninstall | teardown)
         deleteSequence ingress ${INSTALL_NAME} ${INSTALL_NAMESPACE}
