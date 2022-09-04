@@ -27,13 +27,14 @@ case $(checkOpt iu $@) in
         
         # Ingress Gateway
         ! checkNamespace ${INSTALL_INGRESS_NAMESPACE} && \
-            kubectl create namespace ${INSTALL_INGRESS_NAMESPACE}
-        kubectl label namespace ${INSTALL_INGRESS_NAMESPACE} istio-injection=enabled
+            kubectl create namespace ${INSTALL_INGRESS_NAMESPACE} && \
+            kubectl label namespace ${INSTALL_INGRESS_NAMESPACE} istio-injection=enabled
         helm upgrade ${INSTALL_INGRESS_NAMESPACE} ${CHART_REPOSITORY_NAME}/${INSTALL_INGRESS} \
             --namespace ${INSTALL_INGRESS_NAMESPACE} \
             --install \
             --no-hooks \
-            --wait
+            --wait \
+            --set service.type="NodePort"
     ;;
     u | uninstall | teardown)
         if [[ $2 = "CRD" ]]; then
@@ -47,8 +48,11 @@ case $(checkOpt iu $@) in
             deleteSequence helm-repo ${CHART_REPOSITORY_NAME}
         fi
     ;;
-    open)
-        
+    httpsPort)
+        echo $(getSvcNodePort ${INSTALL_INGRESS_NAMESPACE} 2 ${INSTALL_INGRESS_NAMESPACE})
+    ;;
+    httpPort)
+        echo $(getSvcNodePort ${INSTALL_INGRESS_NAMESPACE} 1 ${INSTALL_INGRESS_NAMESPACE})
     ;;
     status) helm status ${INSTALL_ISTIOD} -n ${INSTALL_NAMESPACE} ;;
     values)
@@ -62,7 +66,8 @@ case $(checkOpt iu $@) in
         logHelpHead "packages/Istio/helm.sh"
         logHelpContent i install "install Istio package"
         logHelpContent u uninstall "uninstall Istio package"
-        # logHelpContent open "open Istio web"
+        logHelpContent httpsPort "return https port of Istio Ingress"
+        logHelpContent httpPort "return http port of Istio Ingress"
         logHelpContent status "get Istiod's status"
         logHelpContent values "get Istio chart's values"
         logHelpTail
