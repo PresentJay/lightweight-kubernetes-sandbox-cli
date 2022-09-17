@@ -199,3 +199,5 @@ config/kubeconfig.yaml
 /prometheus.*
 /clickhouse.*
 /airbyte.*
+
+*.secret

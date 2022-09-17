@@ -272,6 +272,9 @@ openURI() {
     esac
 }
 
+createSecret() {
+    echo "$1=$2" >> $3.secret
+}
 
 getEnv "./config/.env"
 

@@ -17,14 +17,10 @@ case $(checkOpt iu $@) in
             --set=extraArgs=${EXTRAARGS} \
             --install \
             --no-hooks
-        createSA admin-user ${INSTALL_NAMESPACE}
-        createCRB admin-user cluster-admin ${INSTALL_NAMESPACE}
         applyIngressNginxHTTPS ${INGRESS_HOSTNAME} ${INGRESS_SERVICE} ${INGRESS_PORT} ${PACKAGE_LABEL} ${INSTALL_NAMESPACE}
     ;;
     u | uninstall | teardown)
         deleteSequence ingress ${INSTALL_NAME} ${INSTALL_NAMESPACE}
-        deleteSequence serviceaccount admin-user ${INSTALL_NAMESPACE}
-        deleteSequence clusterrolebinding admin-user
         deleteSequence helm ${INSTALL_NAME} ${INSTALL_NAMESPACE}
         deleteSequence namespace ${INSTALL_NAMESPACE}
         deleteSequence helm-repo ${CHART_REPOSITORY_NAME}
@@ -40,10 +36,6 @@ case $(checkOpt iu $@) in
         else
             logKill "please set INGRESS_PROTOCOL to http or https only. (in .env)"
         fi
-    ;;
-    token)
-        _secret_=$(kubectl get serviceaccount admin-user -n ${INSTALL_NAMESPACE} -o jsonpath="{.secrets[0].name}")
-        echo $(kubectl get secret ${_secret_} -n ${INSTALL_NAMESPACE} -o go-template="{{.data.token | base64decode}}")
     ;;
     h | help | ? | *)
         logHelpHead "packages/kubernetes-dashboard/helm.sh"
