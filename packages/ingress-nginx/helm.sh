@@ -14,12 +14,14 @@ case $(checkOpt iu $@) in
         helm upgrade ${INSTALL_NAME} ${CHART_REPOSITORY_ORG}/${CHART_REPOSITORY_NAME} \
             --version ${INSTALL_VERSION} \
             --namespace ${INSTALL_NAMESPACE} \
-            --install \
-            --no-hooks \
-            --set controller.metrics.enabled=true \
-            --set controller.metrics.serviceMonitor.enabled=true \
-            --set-string controller.podAnnotations."prometheus\.io/scrape"=true \
-            --set-string controller.podAnnotations."prometheus\.io/port"="10254"
+            --install
+            # --set controller.service.type="NodePort"
+            # --no-hooks \
+            # --set controller.metrics.enabled=true \
+            # --set controller.metrics.serviceMonitor.enabled=true \
+            # --set-string controller.podAnnotations."prometheus\.io/scrape"=true \
+            # --set-string controller.podAnnotations."prometheus\.io/port"="10254"
+            # prometheus 설치 후 주석 해제하여 적용
     ;;
     u | uninstall | teardown)
         deleteSequence helm ${INSTALL_NAME} ${INSTALL_NAMESPACE}
