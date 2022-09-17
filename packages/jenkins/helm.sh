@@ -17,7 +17,7 @@ case $(checkOpt iu $@) in
             --install \
             --set persistence.storageClass=${STORAGE} \
             --set controller.adminUser=${ADMIN_USERNAME} \
-            --set controller.adminPassword=${ADMIN_PASSWORD} 
+            --set controller.adminPassword=${ADMIN_PASSWORD}
         applyIngressNginxHTTP ${INGRESS_HOSTNAME} ${INGRESS_SERVICE} ${INGRESS_PORT} ${PACKAGE_LABEL} ${INSTALL_NAMESPACE}
     ;;
     u | uninstall | teardown)
