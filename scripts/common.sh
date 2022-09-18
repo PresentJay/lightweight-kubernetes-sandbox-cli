@@ -272,7 +272,7 @@ openURI() {
     esac
 }
 
-createSecret() {
+createSecretFile() {
     echo "$1=$2" >> $3.secret
 }
 

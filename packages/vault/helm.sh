@@ -33,24 +33,19 @@ case $(checkOpt iu $@) in
     unseal)
         initResult=$(kubectl exec -n ${INSTALL_NAMESPACE} ${INSTALL_NAME}-$2 -- vault operator init)
         logInfo "init vault-$2 processing. . ."
-        unsealKey1=$(echo ${initResult} | awk '{print $4}')
-        createSecret unsealKey1 ${unsealKey1} packages/vault/unseal-data-$2
-        unsealKey2=$(echo ${initResult} | awk '{print $8}')
-        createSecret unsealKey2 ${unsealKey2} packages/vault/unseal-data-$2
-        unsealKey3=$(echo ${initResult} | awk '{print $12}')
-        createSecret unsealKey3 ${unsealKey3} packages/vault/unseal-data-$2
-        unsealKey4=$(echo ${initResult} | awk '{print $16}')
-        createSecret unsealKey4 ${unsealKey4} packages/vault/unseal-data-$2
-        unsealKey5=$(echo ${initResult} | awk '{print $20}')
-        createSecret unsealKey5 ${unsealKey5} packages/vault/unseal-data-$2
-        rootKey=$(echo ${initResult} | awk '{print $24}')
-        createSecret rootKey ${rootKey} packages/vault/unseal-data-$2
         
-        kubectl exec -n ${INSTALL_NAMESPACE} ${INSTALL_NAME}-$2 -- vault operator unseal ${unsealKey1}
-        kubectl exec -n ${INSTALL_NAMESPACE} ${INSTALL_NAME}-$2 -- vault operator unseal ${unsealKey2}
-        kubectl exec -n ${INSTALL_NAMESPACE} ${INSTALL_NAME}-$2 -- vault operator unseal ${unsealKey3}
-        kubectl exec -n ${INSTALL_NAMESPACE} ${INSTALL_NAME}-$2 -- vault operator unseal ${unsealKey4}
-        kubectl exec -n ${INSTALL_NAMESPACE} ${INSTALL_NAME}-$2 -- vault operator unseal ${unsealKey5}
+        _unsealThreshold_=5
+        _tempIter_=1
+        while [[ ${_tempIter_} -le $_unsealThreshold_ ]]; do 
+            _unseal_=$(echo ${initResult} | awk "{print \$$(( 4 * _tempIter_ ))}")
+            createSecretFile unsealKey1 ${_unseal_} packages/vault/unseal-data-$2
+            _PROCESS_=$(kubectl exec -n ${INSTALL_NAMESPACE} ${INSTALL_NAME}-$2 -- vault operator unseal ${_unseal_})
+            logInfo "unseal vault-$2 processing. . . (${_tempIter_}/${_unsealThreshold_})"
+            _tempIter_=$(( _tempIter_ + 1 ))
+        done
+        rootKey=$(echo ${initResult} | awk "{print \$$(( 4 * _tempIter_ ))}")
+        createSecretFile rootKey ${rootKey} packages/vault/unseal-data-$2
+        logInfo "use this root key >> ${rootKey}"
     ;;
     open)
         if checkParamIsInList ${INGRESS_PROTOCOL} http https; then
@@ -59,9 +54,15 @@ case $(checkOpt iu $@) in
             _OPENURI_="${INGRESS_PROTOCOL}://${_HOSTURL_}:${_PORT_}"
             openURI ${_OPENURI_}
             logInfo "If vault is just installed, please check the unseal, and give root-token"
+            bash packages/vault/helm.sh --token 0
         else
             logKill "please set INGRESS_PROTOCOL to http or https only. (in .env)"
         fi
+    ;;
+    token)
+        source packages/vault/unseal-data-$2.secret
+        logInfo "fetching vault-$2 rootTokens . . ."
+        echo ${rootKey}
     ;;
     h | help | ? | *)
         logHelpHead "packages/vault/helm.sh"
