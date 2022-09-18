@@ -5,6 +5,9 @@
 
 # QuickStart
 
+**NEW QUICKSTART**
+-> `./boot.sh`
+
 1. multipass (VMware cluster) 설치
    - `bash scripts/multipass.sh -i`
      - teardown: `bash scripts/multipass.sh -u`

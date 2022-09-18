@@ -1,0 +1,1 @@
+bash scripts/multipass.sh --uninstall
