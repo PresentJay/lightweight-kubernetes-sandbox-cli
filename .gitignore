@@ -201,3 +201,4 @@ config/kubeconfig.yaml
 /airbyte.*
 
 *.secret
+*.DS_Store
