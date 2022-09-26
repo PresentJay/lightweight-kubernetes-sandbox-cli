@@ -22,6 +22,7 @@ case $(checkOpt iu $@) in
         deleteSequence helm ${INSTALL_NAME} ${INSTALL_NAMESPACE}
         deleteSequence namespace ${INSTALL_NAMESPACE}
         deleteSequence helm-repo ${CHART_REPOSITORY_NAME}
+        # deleteSequence pvc data-${INSTALL_NAME}-postgresql-0
     ;;
     open)
         if checkParamIsInList ${INGRESS_PROTOCOL} http https; then
