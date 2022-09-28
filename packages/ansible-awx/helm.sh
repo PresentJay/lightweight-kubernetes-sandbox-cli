@@ -3,6 +3,7 @@
 # Author: PresentJay (정현재, presentj94@gmail.com)
 
 source ./scripts/kubecheats.sh
+source ./packages/ansible-awx/awxcheats.sh
 getEnv ./packages/ansible-awx/.env
 
 case $(checkOpt iu $@) in
@@ -13,16 +14,12 @@ case $(checkOpt iu $@) in
             kubectl create namespace ${INSTALL_NAMESPACE}
         helm upgrade ${INSTALL_NAME} ${CHART_ORG}/${CHART_NAME} \
             --namespace ${INSTALL_NAMESPACE} \
-            --install \
-            --set projects_persistence=true \
-            --set projects_storage_class=${STORAGE} \
-            --set projects_storage_size=${PVC_SIZE} \
-            --set admin_user=${ADMIN_USER} \
-            --set admin_password_secret=${ADMIN_PASSWORD_SECRET} \
-            --set admin_email=${ADMIN_EMAIL}
-        applyIngressNginxHTTPS ${INGRESS_HOSTNAME} ${INGRESS_SERVICE} ${INGRESS_PORT} ${PACKAGE_LABEL} ${INSTALL_NAMESPACE}
+            --install
+        applyAWX
+        applyIngressNginxHTTP ${INGRESS_HOSTNAME} ${INGRESS_SERVICE} ${INGRESS_PORT} ${PACKAGE_LABEL} ${INSTALL_NAMESPACE}
     ;;
     u | uninstall | teardown)
+        deleteSequence AWX ${INSTALL_NAME} ${INSTALL_NAMESPACE}
         deleteSequence helm ${INSTALL_NAME} ${INSTALL_NAMESPACE}
         deleteSequence namespace ${INSTALL_NAMESPACE}
         deleteSequence helm-repo ${CHART_REPOSITORY_NAME}
