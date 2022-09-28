@@ -43,7 +43,7 @@ case $(checkOpt iu $@) in
     ;;
     token)
         _secret_=$(kubectl get serviceaccount admin-user -n ${INSTALL_NAMESPACE} -o jsonpath="{.secrets[0].name}")
-        echo $(kubectl get secret ${_secret_} -n ${INSTALL_NAMESPACE} -o go-template="{{.data.token | base64decode}}")
+        getSecretStringData ${_secret_} token ${INSTALL_NAMESPACE}
     ;;
     h | help | ? | *)
         logHelpHead "packages/kubernetes-dashboard/helm.sh"

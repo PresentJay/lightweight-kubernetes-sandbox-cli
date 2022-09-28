@@ -397,6 +397,70 @@ getSvcPort() {
     fi
 }
 
+###########
+# *secret #
+###########
+
+# # # CREATE (apply can create and update) # # #
+
+# $1: secret name
+# $2: string key
+# $3: string value
+# $4: package name
+# $5: namespace (optional)
+applySecretStringData() {
+    # Validate
+    checkParamOrLog $1 "need param 1: secret name"
+    checkParamOrLog $2 "need param 2: string key"
+    checkParamOrLog $3 "need param 3: string value"
+    checkParamOrLog $4 "need param 4: package name"
+    
+    # Check On Eyes Phase
+    local _secretName_=$1
+    local _stringKey_=$2
+    local _stringValue_=$3
+    local _packageName_=$4
+    local _namespace_=$(checkNamespaceOption $5)
+
+    cat <<EOF | kubectl apply -f -
+apiVersion: v1
+kind: Secret
+metadata:
+  name: ${_secretName_}
+  namespace: ${_namespace_}
+  labels:
+    package: ${_packageName_}
+stringData:
+  ${_stringKey_}: ${_stringValue_}
+EOF
+}
+
+# # # GET # # #
+
+# $1: secret name
+# $2: string key
+# #3: namespace name (optional)
+getSecretStringData() {
+    # Validate
+    checkParamOrLog $1 "need param 1: secret name"
+    checkParamOrLog $2 "need param 2: string key"
+
+    # Check On Eyes Phase
+    local _secretName_=$1
+    local _stringKey_=$2
+    local _namespace_=$(checkNamespaceOption $3)
+
+    # Do
+    find=$(kubectl get secret $_secretName_ -n ${_namespace_} -o go-template="{{.data.${_stringKey_} | base64decode}})")
+    if [[ -n ${find} ]]; then
+        echo ${find}
+    else
+        return $FALSE
+    fi
+}
+
+
+
 ########
 # *pvc #
 ########
@@ -452,7 +516,7 @@ EOF
 
 # # # CREATE (apply can create and update) # # #
 
-# param $1: ServiceAccountname
+# param $1: ServiceAccount name
 # param $2: namespace (optional)
 createSA() {
     # Validate

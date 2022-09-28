@@ -19,9 +19,14 @@ spec:
   service_type: ClusterIP
   projects_persistence: true
   projects_storage_class: ${STORAGE}
-  projects_storage_size: ${PVC_SIZE}
+  projects_storage_size: ${WEB_PVC_SIZE}
+  postgres_storage_class: ${STORAGE}
+  postgres_storage_requirements: { requests: {storage: ${DB_PVC_SIZE}} }
+  postgres_extra_args:
+    - '-c'
+    - 'max_connections=1000'
   admin_user: ${ADMIN_USER}
-  admin_password_secret: ${ADMIN_PASSWORD_SECRET}
+  admin_password_secret: ${ADMIN_USER}-secret
   admin_email: ${ADMIN_EMAIL}
   security_context_settings:
     runAsGroup: 0

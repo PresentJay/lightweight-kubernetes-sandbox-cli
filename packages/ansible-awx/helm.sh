@@ -12,6 +12,7 @@ case $(checkOpt iu $@) in
             helm repo add ${CHART_REPOSITORY_NAME} ${CHART_REGISTRY} && helm repo update
         ! checkNamespace ${INSTALL_NAMESPACE} && \
             kubectl create namespace ${INSTALL_NAMESPACE}
+        applySecretStringData ${ADMIN_USER}-secret password ${ADMIN_PASSWORD} ${PACKAGE_LABEL} ${INSTALL_NAMESPACE}
         helm upgrade ${INSTALL_NAME} ${CHART_ORG}/${CHART_NAME} \
             --namespace ${INSTALL_NAMESPACE} \
             --install
@@ -30,6 +31,8 @@ case $(checkOpt iu $@) in
             _PORT_=$(bash packages/ingress-nginx/helm.sh --${INGRESS_PROTOCOL}Port)
             _OPENURI_="${INGRESS_PROTOCOL}://${_HOSTURL_}:${_PORT_}"
             openURI ${_OPENURI_}
+            echo "initialized admin: ${ADMIN_USER}"
+            echo "initialized password: ${ADMIN_PASSWORD}"
         else
             logKill "please set INGRESS_PROTOCOL to http or https only. (in .env)"
         fi
