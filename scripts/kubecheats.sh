@@ -460,6 +460,36 @@ getSecretStringData() {
 }
 
 
+##############
+# *configmap #
+##############
+
+# # # CREATE (apply can create and update) # # #
+
+# $1: configmap name
+# $2: namespace
+# $3 ~ : key-value pair
+applyConfigmap() {
+    # Validate
+    checkParamOrLog $1 "need param 1: configmap name"
+    checkParamOrLog $2 "need param 2: namespace"
+    
+    # Check On Eyes Phase
+    local _configmapName_=$1
+    local _namespace_=$2
+
+    checkObject configmap ${_configmapName_} ${_namespace_} && return $TRUE
+
+    shift
+    shift
+
+    command="kubectl create configmap ${_configmapName_} -n ${_namespace_}"
+    for i in $@; do
+        command="${command} --from-literal ${i}"
+    done
+    loopToSuccess --silent ${command}
+}
+
 
 ########
 # *pvc #

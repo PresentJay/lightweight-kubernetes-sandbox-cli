@@ -3,6 +3,8 @@
 
 # Author: PresentJay (정현재, presentj94@gmail.com)
 
+TRUE=0
+FALSE=1
 
 # explain: ITERATION_LIMIT 회에 걸쳐 성공하기까지 반복하는 function (log 남김)
 # $1: silent mode check (--silent)

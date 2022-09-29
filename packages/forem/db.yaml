@@ -1,0 +1,59 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: forem_postgresql
+spec:
+  selector:
+    app: forem_postgresql
+  type: NodePort
+  ports:
+  - protocol: TCP
+    port: 5432
+    targetPort: 5432
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: forem_postgresql
+  labels:
+    app: forem_postgresql
+spec:
+  serviceName: forem_postgresql
+  replicas: 1
+  selector:
+    matchLabels:
+      app: forem_postgresql
+  template:
+    metadata:
+      labels:
+        app: forem_postgresql
+    spec:
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 20
+      containers:
+        - name: forem_postgresql
+          image: postgres:13-alpine
+          resources:
+            requests:
+              memory: "500Mi"
+              cpu: "500m"
+          imagePullPolicy: "IfNotPresent"
+          securityContext:
+            privileged: true
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/data
+              name: forem_postgresql-dev-data
+              subPath: data
+          envFrom:
+            - configMapRef:
+                name: forem_postgresql-config
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              sysctl -w fs.inotify.max_user_instances=99999999
+              docker-entrypoint.sh postgres
+      volumes:
+      - name: forem_postgresql-dev-data
+        persistentVolumeClaim:
+          claimName: auth-data
+          
