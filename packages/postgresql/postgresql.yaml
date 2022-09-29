@@ -1,0 +1,48 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgresql-svc
+  labels:
+    package: postgresql
+spec:
+  selector:
+    package: postgresql
+  type: NodePort
+  ports:
+  - protocol: TCP
+    port: 5432
+    targetPort: 5432
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgresql
+  labels:
+    package: postgresql
+spec:
+  serviceName: postgresql
+  replicas: 1
+  selector:
+    matchLabels:
+      package: postgresql
+  template:
+    metadata:
+      labels:
+        package: postgresql
+    spec:
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 20
+      containers:
+        - name: postgresql
+          image: postgres:13-alpine
+          imagePullPolicy: "IfNotPresent"
+          envFrom:
+            - configMapRef:
+                name: postgresql-config
+          volumeMounts:
+          - name: postgresql-data
+            mountPath: /var/lib/postgresql/data
+      volumes:
+      - name: postgresql-data
+        persistentVolumeClaim:
+          claimName: postgresql-data
