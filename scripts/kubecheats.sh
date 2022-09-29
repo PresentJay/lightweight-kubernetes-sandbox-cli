@@ -478,7 +478,8 @@ applyConfigmap() {
     local _configmapName_=$1
     local _namespace_=$2
 
-    checkObject configmap ${_configmapName_} ${_namespace_} && return $TRUE
+    checkObject configmap ${_configmapName_} ${_namespace_} && \
+        deleteSequence configmap ${_configmapName_} ${_namespace_}
 
     shift
     shift
