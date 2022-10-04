@@ -451,9 +451,9 @@ getSecretStringData() {
     local _namespace_=$(checkNamespaceOption $3)
 
     # Do
-    find=$(kubectl get secret $_secretName_ -n ${_namespace_} -o go-template="{{.data.${_stringKey_} | base64decode}})")
+    find=$(kubectl get secret ${_secretName_} -n ${_namespace_} -o go-template="{{.data.${_stringKey_} | base64decode}}")
     if [[ -n ${find} ]]; then
-        echo ${find}
+        echo -n ${find}
     else
         return $FALSE
     fi
