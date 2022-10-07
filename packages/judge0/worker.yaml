@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: judge0-worker
+  labels:
+    app: judge0-worker
+    package: judge0
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: judge0-worker
+  template:
+    metadata:
+      labels:
+        app: judge0-worker
+        package: judge0
+    spec:
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 20
+      containers:
+        - name: judge0-worker
+          image: judge0/judge0:latest
+          securityContext:
+            privileged: true
+          imagePullPolicy: "IfNotPresent"
+          command: ["./scripts/workers"]
+          envFrom:
+            - configMapRef:
+                name: judge0-config
+          volumeMounts:
+            - mountPath: /judge0.conf
+              name: judge0-conf
+      volumes:
+        - name: judge0-conf
+          configMap: 
+            name: judge0-conf
+            items:
+              - key: judge0.conf
+                path: judge0.conf

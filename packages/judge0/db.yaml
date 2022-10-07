@@ -1,0 +1,49 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: judge0-db-svc
+  labels:
+    package: judge0
+spec:
+  selector:
+    package: judge0
+  type: NodePort
+  ports:
+  - protocol: TCP
+    port: 5432
+    targetPort: 5432
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: judge0-db
+  labels:
+    package: judge0
+spec:
+  serviceName: judge0-db
+  replicas: 1
+  selector:
+    matchLabels:
+      package: judge0
+  template:
+    metadata:
+      labels:
+        package: judge0
+    spec:
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 20
+      containers:
+        - name: judge0-db
+          image: postgres:13-alpine
+          imagePullPolicy: "IfNotPresent"
+          envFrom:
+            - configMapRef:
+                name: judge0-db-config
+          volumeMounts:
+          - name: judge0-db-data
+            mountPath: /var/lib/postgresql/data
+            subPath: data
+      volumes:
+      - name: judge0-db-data
+        persistentVolumeClaim:
+          claimName: judge0-db-data

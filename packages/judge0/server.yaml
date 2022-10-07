@@ -1,0 +1,57 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: judge0-server-svc
+  labels:
+    package: judge0
+    app: judge0-server
+spec:
+  selector:
+    app: judge0-server
+    package: judge0
+  type: ClusterIP
+  ports:
+  - name: http
+    port: 2358
+    targetPort: 2358
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: judge0-server
+  labels:
+    app: judge0-server
+    package: judge0
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: judge0-server
+  template:
+    metadata:
+      labels:
+        app: judge0-server
+        package: judge0
+    spec:
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 20
+      containers:
+        - name: judge0-server
+          image: judge0/judge0:latest
+          imagePullPolicy: "IfNotPresent"
+          securityContext:
+            privileged: true
+          envFrom:
+            - configMapRef:
+                name: judge0-config
+          volumeMounts:
+            - mountPath: /judge0.conf
+              name: judge0-conf
+      volumes:
+        - name: judge0-conf
+          configMap: 
+            name: judge0-conf
+            items:
+              - key: judge0.conf
+                path: judge0.conf
+          
