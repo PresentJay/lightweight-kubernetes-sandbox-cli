@@ -1,0 +1,49 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: noj-redis-svc
+  labels:
+    package: noj
+spec:
+  selector:
+    package: noj
+  type: NodePort
+  ports:
+  - protocol: TCP
+    port: 6379
+    targetPort: 6379
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: noj-redis
+  labels:
+    package: noj
+spec:
+  serviceName: noj-redis
+  replicas: 1
+  selector:
+    matchLabels:
+      package: noj
+  template:
+    metadata:
+      labels:
+        package: noj
+    spec:
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 20
+      containers:
+        - name: noj-redis
+          image: docker.io/bitnami/redis:6.0
+          imagePullPolicy: "IfNotPresent"
+          envFrom:
+            - configMapRef:
+                name: noj-redis-config
+          volumeMounts:
+          - name: noj-redis-data
+            mountPath: /bitnami/redis/data
+            subPath: data
+      volumes:
+      - name: noj-redis-data
+        persistentVolumeClaim:
+          claimName: noj-redis-data

@@ -1,0 +1,49 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: noj-db-svc
+  labels:
+    package: noj
+spec:
+  selector:
+    package: noj
+  type: NodePort
+  ports:
+  - protocol: TCP
+    port: 3306
+    targetPort: 3306
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: noj-db
+  labels:
+    package: noj
+spec:
+  serviceName: noj-db
+  replicas: 1
+  selector:
+    matchLabels:
+      package: noj
+  template:
+    metadata:
+      labels:
+        package: noj
+    spec:
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 20
+      containers:
+        - name: noj-db
+          image: docker.io/bitnami/mysql:8.0
+          imagePullPolicy: "IfNotPresent"
+          envFrom:
+            - configMapRef:
+                name: noj-db-config
+          volumeMounts:
+          - name: noj-db-data
+            mountPath: /bitnami/mysql/data
+            subPath: data
+      volumes:
+      - name: noj-db-data
+        persistentVolumeClaim:
+          claimName: noj-db-data

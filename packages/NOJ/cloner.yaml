@@ -1,0 +1,40 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: git-cloner
+  labels:
+    app: git-cloner
+spec:
+  ttlSecondsAfterFinished: 5
+  template:
+    spec:
+      containers:
+      - name: git-cloner
+        image: docker.io/bitnami/laravel:7
+        imagePullPolicy: "IfNotPresent"
+        workingDir: /app
+        securityContext:
+          runAsUser: 0
+          privileged: true
+        env:
+          - name: GIT_URL
+            value: "https://bot:bot@github.com/ZsgsDesign/NOJ.git"
+          - name: GIT_BRANCH
+            value: "master"
+        command: ["/bin/sh", "-c"]
+        args:
+            - |
+              sudo apt-get update -y
+              apt-get install git -y
+              git clone $(GIT_URL) . -v
+              git fetch --all
+              git checkout $(GIT_BRANCH)
+        volumeMounts:
+          - name: git-vol
+            mountPath: /app
+            subPath: app
+      volumes:
+        - name: git-vol 
+          persistentVolumeClaim:
+            claimName: git-vol
+      restartPolicy: Never

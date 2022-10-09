@@ -1,0 +1,59 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: noj-noj-svc
+  labels:
+    package: noj
+spec:
+  selector:
+    package: noj
+  ports:
+  - protocol: TCP
+    port: 3000
+    targetPort: 3000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: noj-noj
+  labels:
+    app: noj-noj
+    package: noj
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: noj-noj
+  template:
+    metadata:
+      labels:
+        app: noj-noj
+        package: noj
+    spec:
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 20
+      containers:
+        - name: noj-noj
+          image: docker.io/bitnami/laravel:7
+          securityContext:
+            privileged: true
+          workingDir: /app
+          imagePullPolicy: "IfNotPresent"
+          envFrom:
+            - configMapRef:
+                name: noj-noj-config
+          volumeMounts:
+            - name: git-vol
+              mountPath: /app
+              subPath: app
+          command: ["/bin/sh", "-c"]
+          args: 
+            - |
+              composer update
+              composer install
+              cp .env.example .env
+              sleep 5000
+      volumes:
+        - name: git-vol
+          persistentVolumeClaim:
+            claimName: git-vol
