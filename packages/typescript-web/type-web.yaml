@@ -1,0 +1,58 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: type-web-svc
+  labels:
+    package: type-web
+    app: type-web
+spec:
+  selector:
+    app: type-web
+  type: ClusterIP
+  ports:
+  - name: http
+    port: 8000
+    targetPort: 8000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: type-web
+  labels:
+    app: type-web
+    package: type-web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: type-web
+  template:
+    metadata:
+      labels:
+        app: type-web
+        package: type-web
+    spec:
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 20
+      containers:
+        - name: type-web
+          image: node:14-bullseye
+          imagePullPolicy: "IfNotPresent"
+          workingDir: /app
+          command: ["/bin/sh", "-c"]
+          args: 
+            - |
+              yarn start
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8000
+              scheme: HTTP
+          volumeMounts:
+            - name: git-vol
+              mountPath: /app
+              subPath: app
+      volumes:
+        - name: git-vol
+          persistentVolumeClaim:
+            claimName: git-vol

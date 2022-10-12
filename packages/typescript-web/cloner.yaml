@@ -1,0 +1,39 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: git-cloner
+  labels:
+    app: git-cloner
+spec:
+  ttlSecondsAfterFinished: 5
+  template:
+    spec:
+      containers:
+      - name: git-cloner
+        image: node:14-bullseye
+        imagePullPolicy: "IfNotPresent"
+        workingDir: /app
+        securityContext:
+          runAsUser: 0
+          privileged: true
+        env:
+          - name: GIT_URL
+            value: https://github.com/PresentJay/TypeScript-Website.git
+        command: ["/bin/sh", "-c"]
+        args:
+            - |
+              sudo apt-get update -y
+              apt-get install git -y
+              git clone $(GIT_URL) . -v
+              yarn install
+              yarn bootstrap
+              yarn docs-sync pull microsoft/TypeScript-Website-localizations#main 1
+        volumeMounts:
+          - name: git-vol
+            mountPath: /app
+            subPath: app
+      volumes:
+        - name: git-vol 
+          persistentVolumeClaim:
+            claimName: git-vol
+      restartPolicy: Never
