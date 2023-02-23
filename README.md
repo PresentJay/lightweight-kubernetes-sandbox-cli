@@ -5,6 +5,8 @@
 
 # QuickStart
 
+[진또배기 퀵스타트](https://velog.io/@ryuni/Multipass%EB%A5%BC-%ED%99%9C%EC%9A%A9%ED%95%9C-kubernetes-%ED%81%B4%EB%9F%AC%EC%8A%A4%ED%84%B0-%EA%B5%AC%EC%B6%95-%EB%B0%A9%EB%B2%95) 
+
 **NEW QUICKSTART**
 -> `./boot.sh`
 
